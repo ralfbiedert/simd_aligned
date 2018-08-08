@@ -45,3 +45,28 @@ where
 {
     simd_container_flat_slice_mut(data, data.len() * T::LANES)
 }
+
+mod test {
+    use super::{slice_as_flat, slice_as_flat_mut};
+    use crate::f32x4;
+
+    #[test]
+    fn slice_flattening() {
+        let x_0 = [f32x4::splat(0.0); 0];
+        let x_1 = [f32x4::splat(0.0); 1];
+
+        let mut x_0_m = [f32x4::splat(0.0); 0];
+        let mut x_1_m = [f32x4::splat(0.0); 1];
+
+        let y_0 = slice_as_flat(&x_0);
+        let y_1 = slice_as_flat(&x_1);
+
+        let y_0_m = slice_as_flat_mut(&mut x_0_m);
+        let y_1_m = slice_as_flat_mut(&mut x_1_m);
+
+        assert_eq!(y_0.len(), 0);
+        assert_eq!(y_1.len(), 4);
+        assert_eq!(y_0_m.len(), 0);
+        assert_eq!(y_1_m.len(), 4);
+    }
+}

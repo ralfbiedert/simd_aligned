@@ -10,7 +10,7 @@ mod vector;
 pub use packed_simd::*;
 
 pub use crate::conversion::{slice_as_flat, slice_as_flat_mut};
-pub use crate::matrix::SimdMatrix;
+pub use crate::matrix::{ColumnOptimized, RowOptimized, SimdMatrix};
 pub use crate::vector::SimdVector;
 
 /// This is copy-paste from `packed_simd`, where this trait is unfortunately

@@ -6,7 +6,7 @@ use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut
 use super::rows::SimdRows;
 use super::Simd;
 
-pub trait Optimized {
+pub trait OptimizationStrategy {
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize);
 
     fn assert_column();
@@ -18,7 +18,7 @@ pub struct RowOptimized;
 
 pub struct ColumnOptimized;
 
-impl Optimized for RowOptimized {
+impl OptimizationStrategy for RowOptimized {
     #[inline]
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
         (x, y)
@@ -31,7 +31,7 @@ impl Optimized for RowOptimized {
     }
 }
 
-impl Optimized for ColumnOptimized {
+impl OptimizationStrategy for ColumnOptimized {
     #[inline]
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
         (y, x)
@@ -45,16 +45,10 @@ impl Optimized for ColumnOptimized {
 }
 
 #[derive(Debug)]
-pub enum OptimizedFor {
-    RowAccess,
-    ColumnAccess,
-}
-
-#[derive(Debug)]
 pub struct SimdMatrix<T, O>
 where
     T: Simd + Default + Clone,
-    O: Optimized,
+    O: OptimizationStrategy,
 {
     crate simd_rows: SimdRows<T, Vec<T>>,
     phantom: PhantomData<O>,
@@ -63,10 +57,10 @@ where
 impl<T, O> SimdMatrix<T, O>
 where
     T: Simd + Default + Clone,
-    O: Optimized,
+    O: OptimizationStrategy,
 {
     #[inline]
-    pub fn with_dimension(width: usize, height: usize, optimized_for: OptimizedFor) -> Self {
+    pub fn with_dimension(width: usize, height: usize) -> Self {
         let (x, y) = O::translate_indices_to_simdrows(width, height);
 
         SimdMatrix {
@@ -78,7 +72,18 @@ where
     #[inline]
     pub fn row(&self, i: usize) -> &[T] {
         O::assert_row();
-        &self.simd_rows.data.slice()[self.simd_rows.range_for_row(i)]
+        let range = self.simd_rows.range_for_row(i);
+        &self.simd_rows.data.slice()[range]
+    }
+
+    #[inline]
+    pub fn row_iter(&self) -> SimdMatrixIter<T, O> {
+        O::assert_row();
+
+        SimdMatrixIter {
+            matrix: &self,
+            index: 0,
+        }
     }
 
     #[inline]
@@ -104,7 +109,18 @@ where
     #[inline]
     pub fn column(&self, i: usize) -> &[T] {
         O::assert_column();
-        &self.simd_rows.data.slice()[self.simd_rows.range_for_row(i)]
+        let range = self.simd_rows.range_for_row(i);
+        &self.simd_rows.data.slice()[range]
+    }
+
+    #[inline]
+    pub fn column_iter(&self) -> SimdMatrixIter<T, O> {
+        O::assert_column();
+
+        SimdMatrixIter {
+            matrix: &self,
+            index: 0,
+        }
     }
 
     #[inline]
@@ -147,7 +163,7 @@ where
 pub struct SimdMatrixFlat<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: Optimized,
+    O: OptimizationStrategy,
 {
     matrix: &'a SimdMatrix<T, O>,
     phantom: PhantomData<O>, // Do we actually need this / is there a better way?
@@ -156,32 +172,168 @@ where
 pub struct SimdMatrixFlatMut<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: Optimized,
+    O: OptimizationStrategy,
 {
     matrix: &'a mut SimdMatrix<T, O>,
     phantom: PhantomData<O>, // Do we actually need this / is there a better way?
 }
 
-// impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlat<'a, T, O>
-// where
-//     T: Simd + Default + Clone,
-//     O: Optimized,
-// {
-//     type Output = T::Element;
+impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlat<'a, T, O>
+where
+    T: Simd + Default + Clone,
+    O: OptimizationStrategy,
+{
+    type Output = T::Element;
 
-//     #[inline]
-//     fn index(&self, index: usize) -> &Self::Output {
-//         &self.simd_rows.data[index]
-//     }
-// }
+    #[inline]
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let row_slice = self.matrix.simd_rows.row_as_flat(row);
 
-// impl<'a, T, O> IndexMut<(usize, usize)> for SimdMatrixFlat<'a, T, O>
-// where
-//     T: Simd + Default + Clone,
-//     O: Optimized,
-// {
-//     #[inline]
-//     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-//         &mut self.simd_rows.data[index]
-//     }
-// }
+        &row_slice[x]
+    }
+}
+
+impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
+where
+    T: Simd + Default + Clone,
+    O: OptimizationStrategy,
+{
+    type Output = T::Element;
+
+    #[inline]
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let row_slice = self.matrix.simd_rows.row_as_flat(row);
+
+        &row_slice[x]
+    }
+}
+
+impl<'a, T, O> IndexMut<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
+where
+    T: Simd + Default + Clone,
+    O: OptimizationStrategy,
+{
+    #[inline]
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let row_slice = self.matrix.simd_rows.row_as_flat_mut(row);
+
+        &mut row_slice[x]
+    }
+}
+
+/// Basic iterator struct to go over matrix
+#[derive(Clone, Debug)]
+pub struct SimdMatrixIter<'a, T: 'a, O: 'a>
+where
+    T: Simd + Default + Clone,
+    O: OptimizationStrategy,
+{
+    /// Reference to the matrix we iterate over.
+    crate matrix: &'a SimdMatrix<T, O>,
+
+    /// Current index of vector iteration.
+    crate index: usize,
+}
+
+impl<'a, T, O> Iterator for SimdMatrixIter<'a, T, O>
+where
+    T: Simd + Default + Clone,
+    O: OptimizationStrategy,
+{
+    type Item = &'a [T];
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= self.matrix.simd_rows.rows {
+            None
+        } else {
+            let range = self.matrix.simd_rows.range_for_row(self.index);
+            self.index += 1;
+            Some(&self.matrix.simd_rows.data[range])
+        }
+    }
+}
+
+mod test {
+    use super::{ColumnOptimized, RowOptimized, SimdMatrix};
+    use crate::f32x4;
+    use std::ops::Range;
+
+    #[test]
+    fn allocation_size() {
+        let m_1_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 1);
+        let m_1_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 1);
+
+        let m_5_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 5);
+        let m_5_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 5);
+
+        let m_1_4_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 4);
+        let m_4_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(4, 1);
+
+        let m_4_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(4, 1);
+        let m_1_4_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 4);
+
+        assert_eq!(m_1_1_r.simd_rows.data.len(), 1);
+        assert_eq!(m_1_1_c.simd_rows.data.len(), 1);
+
+        assert_eq!(m_5_5_r.simd_rows.data.len(), 10);
+        assert_eq!(m_5_5_c.simd_rows.data.len(), 10);
+
+        assert_eq!(m_1_4_r.simd_rows.data.len(), 1);
+        assert_eq!(m_4_1_c.simd_rows.data.len(), 1);
+
+        assert_eq!(m_4_1_r.simd_rows.data.len(), 4);
+        assert_eq!(m_1_4_c.simd_rows.data.len(), 4);
+    }
+
+    #[test]
+
+    fn access() {
+        let mut m_5_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 5);
+        let mut m_5_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 5);
+
+        assert_eq!(m_5_5_c.column(0).len(), 2);
+        assert_eq!(m_5_5_c.column_mut(0).len(), 2);
+        assert_eq!(m_5_5_c.column_as_flat(0).len(), 5);
+        assert_eq!(m_5_5_c.column_as_flat_mut(0).len(), 5);
+
+        assert_eq!(m_5_5_r.row(0).len(), 2);
+        assert_eq!(m_5_5_r.row_mut(0).len(), 2);
+        assert_eq!(m_5_5_r.row_as_flat(0).len(), 5);
+        assert_eq!(m_5_5_r.row_as_flat_mut(0).len(), 5);
+
+        let mut count = 0;
+
+        for _ in m_5_5_c.column_iter() {
+            count += 1
+        }
+
+        for _ in m_5_5_r.row_iter() {
+            count += 1
+        }
+
+        assert_eq!(count, 10);
+    }
+
+    #[test]
+
+    fn flattened() {
+        let mut m_1_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 5);
+        let mut m_1_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 5);
+        let mut m_5_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 1);
+        let mut m_5_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 1);
+
+        let mut m_1_5_r_flat = m_1_5_r.flat_mut();
+        let mut m_1_5_c_flat = m_1_5_c.flat_mut();
+        let mut m_5_1_c_flat = m_5_1_c.flat_mut();
+        let mut m_5_1_r_flat = m_5_1_r.flat_mut();
+
+        m_1_5_r_flat[(0, 4)] = 1.0;
+        m_1_5_c_flat[(0, 4)] = 1.0;
+        m_5_1_r_flat[(4, 0)] = 1.0;
+        m_5_1_c_flat[(4, 0)] = 1.0;
+    }
+}

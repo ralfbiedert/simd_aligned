@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Deref, Index, IndexMut};
 
 use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
@@ -54,5 +54,60 @@ where
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.simd_rows.data[index]
+    }
+}
+
+impl<T> Deref for SimdVector<T>
+where
+    T: Simd + Default + Clone,
+{
+    type Target = [T];
+
+    fn deref(&self) -> &[T] {
+        &self.simd_rows.data[..]
+    }
+}
+
+mod test {
+    use super::SimdVector;
+    use crate::f32x4;
+    use std::ops::Range;
+
+    #[test]
+    fn allocation_size() {
+        let v_1 = SimdVector::<f32x4>::with_size(4);
+        let v_2 = SimdVector::<f32x4>::with_size(5);
+
+        assert_eq!(v_1.simd_rows.data.len(), 1);
+        assert_eq!(v_2.simd_rows.data.len(), 2);
+    }
+
+    #[test]
+    fn flat() {
+        let mut v = SimdVector::<f32x4>::with_size(16);
+        let r_m = v.flat_mut();
+
+        assert_eq!(r_m.len(), 16);
+
+        for x in r_m {
+            *x = 1.0
+        }
+
+        let mut sum = 0.0;
+        let r = v.flat();
+
+        assert_eq!(r.len(), 16);
+
+        for x in r {
+            sum += x;
+        }
+
+        assert!((sum - 16.0).abs() <= std::f32::EPSILON);
+    }
+
+    #[test]
+    fn deref() {
+        let v = SimdVector::<f32x4>::with_size(16);
+        assert_eq!(&v[0], &v[0]);
     }
 }
