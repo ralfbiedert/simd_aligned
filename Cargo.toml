@@ -1,6 +1,11 @@
+cargo-features = ["edition"]
+
 [package]
 name = "simd_aligned"
 version = "0.1.0"
 authors = ["Ralf Biedert <rb@xr.io>"]
+edition = "2018"
+
 
 [dependencies]
+packed_simd = "0.1"
