@@ -1,10 +1,38 @@
 use simd_aligned::*;
 
+fn add() {
+    let mut v1 = SimdVector::<f64s>::with_size(10);
+    let mut v2 = SimdVector::<f64s>::with_size(10);
+
+    let v1_m = v1.flat_mut();
+    let v2_m = v2.flat_mut();
+
+    // Set some elements on v1
+    v1_m[0] = 0.0;
+    v1_m[4] = 4.0;
+    v1_m[8] = 8.0;
+
+    // Set some others on v2
+    v2_m[1] = 0.0;
+    v2_m[5] = 5.0;
+    v2_m[9] = 9.0;
+
+    // for x in v1.iter() {}
+
+    let mut result = SimdVector::<f64s>::with_size(10);
+
+    result[0] = v1[0] + v2[0];
+
+    // for (x, y) in v1.iter().zip(v2.iter()) {
+    //     sum += *x + *y;
+    // }
+}
+
 fn vector() {
     // Create a vector of f64x__ elements that, in total, will hold space
     // for at least 4 f64 values. Internally this might be one f64x4, two f64x2,
     // or one f64x8 where the 2nd half is hidden, depending on the current architecture.
-    let mut v = SimdVector::<f64s>::with_size(4);
+    let mut v = SimdVector::<f64s>::with_size(8);
 
     // Get a 'flat view' (&[f64]) into the SIMD vectors and fill it.
     v.flat_mut().clone_from_slice(&[0.0, 1.0, 2.0, 3.0]);
@@ -27,6 +55,7 @@ fn matrix() {
 }
 
 fn main() {
+    add();
     vector();
     matrix();
 }

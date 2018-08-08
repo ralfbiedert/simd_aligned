@@ -14,8 +14,10 @@ pub trait OptimizationStrategy {
     fn assert_row();
 }
 
+#[derive(Clone, Debug)]
 pub struct RowOptimized;
 
+#[derive(Clone, Debug)]
 pub struct ColumnOptimized;
 
 impl OptimizationStrategy for RowOptimized {
@@ -44,7 +46,7 @@ impl OptimizationStrategy for ColumnOptimized {
     fn assert_column() {}
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SimdMatrix<T, O>
 where
     T: Simd + Default + Clone,
@@ -67,6 +69,10 @@ where
             simd_rows: SimdRows::with(T::default(), x, y),
             phantom: PhantomData,
         }
+    }
+
+    pub fn dimension(&self) -> (usize, usize) {
+        O::translate_indices_to_simdrows(self.simd_rows.rows, self.simd_rows.row_length)
     }
 
     #[inline]
@@ -259,7 +265,7 @@ where
 
 mod test {
     use super::{ColumnOptimized, RowOptimized, SimdMatrix};
-    use crate::f32x4;
+    use crate::*;
     use std::ops::Range;
 
     #[test]
@@ -313,6 +319,13 @@ mod test {
 
         for _ in m_5_5_r.row_iter() {
             count += 1
+        }
+
+        let r1 = m_5_5_r.row(3);
+        let r2 = m_5_5_r.row(4);
+
+        for (x, y) in r1.iter().zip(r2) {
+            *x + *y;
         }
 
         assert_eq!(count, 10);
