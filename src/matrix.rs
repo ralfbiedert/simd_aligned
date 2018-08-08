@@ -187,7 +187,7 @@ where
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat(row);
 
         &row_slice[x]
@@ -203,7 +203,7 @@ where
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat(row);
 
         &row_slice[x]
@@ -217,7 +217,7 @@ where
 {
     #[inline]
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
-        let (x, row) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat_mut(row);
 
         &mut row_slice[x]
