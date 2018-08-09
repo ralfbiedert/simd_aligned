@@ -88,9 +88,9 @@ become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ra
 
 
 
-[travis]: https://travis-ci.org/ralfbiedert/simd_aligned
-[Travis-CI Status]: https://travis-ci.org/ralfbiedert/simd_aligned.svg?branch=master
-[Latest Version]: https://img.shields.io/crates/v/simd_aligned.svg
+[travis]: https://travis-ci.org/ralfbiedert/simd_aligned_rust
+[Travis-CI Status]: https://travis-ci.org/ralfbiedert/simd_aligned_rust.svg?branch=master
+[Latest Version]: https://img.shields.io/crates/v/simd_aligned_rust.svg
 [crates.io]: https://crates.io/crates/simd_aligned
 [MIT]: https://img.shields.io/badge/license-MIT-blue.svg
 [docs]: https://docs.rs/simd_aligned/badge.svg
