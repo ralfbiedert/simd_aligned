@@ -50,7 +50,12 @@ impl OptimizationStrategy for ColumnOptimized {
     fn assert_column() {}
 }
 
-/// A matrix with one axis aligned for fast and safe SIMD access that also provides a flat view on its data.
+/// A matrix with one axis aligned for fast and safe SIMD access that also provides a flat view on
+/// its data.
+///
+/// You can use [SimdMatrix] when you need to deal with multiple SIMD vectors, but
+/// want them arranged in a compact cache-friendly manner. Internally this struct is backed by a
+/// continuous vector of aligned vectors, and dynamically sliced according to row / column access.
 ///
 /// # Example
 ///
@@ -58,19 +63,21 @@ impl OptimizationStrategy for ColumnOptimized {
 /// use packed_simd::*;
 /// use simd_aligned::*;
 ///
-/// // Create a matrix of height 10 and width 5, optimized for row access.
-/// // That means you will be able to access `m.row(4)`, and get a continuous view
-/// // of all `f32s` that constitute that row.
-/// let m = SimdMatrix::<f32s, RowOptimized>::with_dimension(10, 5);
+/// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.
+/// let mut m = SimdMatrix::<f32s, RowOptimized>::with_dimension(10, 5);
+///
+/// // A `RowOptimized` matrix provides `row` access. In this example, you could query
+/// // rows `0` to `9` and receive vectors that can hold a total of at least `5` elements.
 /// let _ = m.row(4);
-
-/// // Accessing the column does not work, as there is no continuous view in memory
+///
+/// // But accessing columns doesn't work, as there is no continuous view in memory.
 /// // m.column(3); --> panic!
-
-/// // However, you can always get a flat view of the matrix, for "normal-speed" query and update
-/// // of all elements:
-/// let m_flat = m.flat();
-/// let _ = m_flat[(3, 4)];
+///
+/// // However, you can always get a flat view of the matrix, for "scalar-speed"
+/// // query and update all elements:
+/// let m_flat = m.flat_mut();
+///
+/// m_flat[(2, 4)] = 42_f32;
 /// ```
 #[derive(Clone, Debug)]
 pub struct SimdMatrix<T, O>
@@ -192,6 +199,7 @@ where
     }
 }
 
+/// Produced by [SimdMatrix::flat], this allow for flat matrix access.
 pub struct SimdMatrixFlat<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
@@ -201,6 +209,7 @@ where
     phantom: PhantomData<O>, // Do we actually need this / is there a better way?
 }
 
+/// Provided by [SimdMatrix::flat_mut], this allow for flat, mutable matrix access.
 pub struct SimdMatrixFlatMut<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,

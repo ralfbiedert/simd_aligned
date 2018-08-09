@@ -75,7 +75,10 @@ mod vector;
 use packed_simd::*;
 
 pub use crate::conversion::{packed_as_flat, packed_as_flat_mut};
-pub use crate::matrix::{ColumnOptimized, OptimizationStrategy, RowOptimized, SimdMatrix};
+pub use crate::matrix::{
+    ColumnOptimized, OptimizationStrategy, RowOptimized, SimdMatrix, SimdMatrixFlat,
+    SimdMatrixFlatMut,
+};
 pub use crate::vector::SimdVector;
 
 use crate::sealed::*;
