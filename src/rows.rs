@@ -1,8 +1,9 @@
 use std::{marker::PhantomData, ops::Range};
 
+use crate::sealed::Simd;
+
 use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-use super::Simd;
 
 #[derive(Clone, Debug)]
 crate struct SimdRows<T, C>

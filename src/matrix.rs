@@ -1,11 +1,13 @@
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
 
+use crate::sealed::Simd;
+
 use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 use super::rows::SimdRows;
-use super::Simd;
 
+#[doc(hidden)]
 pub trait OptimizationStrategy {
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize);
 
@@ -15,9 +17,11 @@ pub trait OptimizationStrategy {
 }
 
 #[derive(Clone, Debug)]
+#[doc(hidden)]
 pub struct RowOptimized;
 
 #[derive(Clone, Debug)]
+#[doc(hidden)]
 pub struct ColumnOptimized;
 
 impl OptimizationStrategy for RowOptimized {
@@ -46,6 +50,28 @@ impl OptimizationStrategy for ColumnOptimized {
     fn assert_column() {}
 }
 
+/// A matrix with one axis aligned for fast and safe SIMD access that also provides a flat view on its data.
+///
+/// # Example
+///
+/// ```rust
+/// use packed_simd::*;
+/// use simd_aligned::*;
+///
+/// // Create a matrix of height 10 and width 5, optimized for row access.
+/// // That means you will be able to access `m.row(4)`, and get a continuous view
+/// // of all `f32s` that constitute that row.
+/// let m = SimdMatrix::<f32s, RowOptimized>::with_dimension(10, 5);
+/// let _ = m.row(4);
+
+/// // Accessing the column does not work, as there is no continuous view in memory
+/// // m.column(3); --> panic!
+
+/// // However, you can always get a flat view of the matrix, for "normal-speed" query and update
+/// // of all elements:
+/// let m_flat = m.flat();
+/// let _ = m_flat[(3, 4)];
+/// ```
 #[derive(Clone, Debug)]
 pub struct SimdMatrix<T, O>
 where

@@ -18,23 +18,24 @@ You want to use [std::simd](https://github.com/rust-lang-nursery/packed_simd/) b
 * provides N-dimensional `SimdVector` and NxM-dimensional `SimdMatrix`.
 
 
-Note: Right now this is an experimental crate. Features might be added or removed depending on how [std::simd](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
+**Note**: Right now this is an experimental crate. Features might be added or removed depending on how [std::simd](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
 
 
 # Examples
 
 Produces a vector that can hold `10` elements of type `f64`. Might internally
 allocate `5` elements of type `f64x2`, or `3` of type `f64x4`, depending on the platform.
-All elements are guaranteed to be properly aligned for fast access on all platforms.
+All elements are guaranteed to be properly aligned for fast access.
 
 ```rust
-let mut v1 = SimdVector::<f64s>::with_size(10);
-let mut v2 = SimdVector::<f64s>::with_size(10);
-```
+use packed_simd::*;
+use simd_aligned::*;
 
-Now get a "flat", mutable view of the vector, and set individual elements:
+// Create vectors of `10` f64 elements with value `0.0`.
+let mut v1 = SimdVector::<f64s>::with(0.0, 10);
+let mut v2 = SimdVector::<f64s>::with(0.0, 10);
 
-```rust
+// Get "flat", mutable view of the vector, and set individual elements:
 let v1_m = v1.flat_mut();
 let v2_m = v2.flat_mut();
 
@@ -48,18 +49,23 @@ v2_m[1] = 0.0;
 v2_m[5] = 5.0;
 v2_m[9] = 9.0;
 
-```
+let mut sum = f64s::splat(0.0);
 
-Eventually, do something with the actual SIMD types:
-
-```rust
-let mut sum = f32s::splat(0.0);
-
-// Does `std::simd` vector math, e.g., f64x8 + f64x8 in one operation.
+// Eventually, do something with the actual SIMD types. Does
+// `std::simd` vector math, e.g., f64x8 + f64x8 in one operation:
 sum = v1[0] + v2[0];
 ```
 
+# Benchmarks
 
+There is no performance penalty for using `simd_aligned`, while retaining all the
+simplicity of handling flat arrays.
+
+```
+test vectors::packed       ... bench:          77 ns/iter (+/- 4)
+test vectors::scalar       ... bench:       1,177 ns/iter (+/- 464)
+test vectors::simd_aligned ... bench:          71 ns/iter (+/- 5)
+```
 
 
 

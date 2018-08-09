@@ -1,4 +1,4 @@
-use super::Simd;
+use crate::sealed::Simd;
 
 #[inline]
 crate fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]
@@ -30,16 +30,41 @@ where
     unsafe { std::slice::from_raw_parts_mut(mut_ptr, length) }
 }
 
+/// Converts an slice of SIMD vectors into a flat slice of elements.
+///
+/// # Example
+/// ```rust
+/// use simd_aligned::*;
+/// use packed_simd::*;
+///
+/// let packed = [f32x4::splat(0_f32); 4];
+///
+/// let flat = packed_as_flat(&packed);
+///
+/// assert_eq!(flat.len(), 16);
+/// ```
 #[inline]
-pub fn slice_as_flat<T>(data: &[T]) -> &[T::Element]
+pub fn packed_as_flat<T>(data: &[T]) -> &[T::Element]
 where
     T: Simd + Default + Clone,
 {
     simd_container_flat_slice(data, data.len() * T::LANES)
 }
 
+/// Converts a mutable slice of SIMD vectors into a flat slice of elements.
+/// # Example
+/// ```rust
+/// use simd_aligned::*;
+/// use packed_simd::*;
+///
+/// let mut packed = [f32x4::splat(0_f32); 4];
+///
+/// let flat = packed_as_flat_mut(&mut packed);
+///
+/// assert_eq!(flat.len(), 16);
+/// ```
 #[inline]
-pub fn slice_as_flat_mut<T>(data: &mut [T]) -> &mut [T::Element]
+pub fn packed_as_flat_mut<T>(data: &mut [T]) -> &mut [T::Element]
 where
     T: Simd + Default + Clone,
 {
@@ -47,7 +72,7 @@ where
 }
 
 mod test {
-    use super::{slice_as_flat, slice_as_flat_mut};
+    use super::{packed_as_flat, packed_as_flat_mut};
     use crate::f32x4;
 
     #[test]
@@ -58,11 +83,11 @@ mod test {
         let mut x_0_m = [f32x4::splat(0.0); 0];
         let mut x_1_m = [f32x4::splat(0.0); 1];
 
-        let y_0 = slice_as_flat(&x_0);
-        let y_1 = slice_as_flat(&x_1);
+        let y_0 = packed_as_flat(&x_0);
+        let y_1 = packed_as_flat(&x_1);
 
-        let y_0_m = slice_as_flat_mut(&mut x_0_m);
-        let y_1_m = slice_as_flat_mut(&mut x_1_m);
+        let y_0_m = packed_as_flat_mut(&mut x_0_m);
+        let y_1_m = packed_as_flat_mut(&mut x_1_m);
 
         assert_eq!(y_0.len(), 0);
         assert_eq!(y_1.len(), 4);

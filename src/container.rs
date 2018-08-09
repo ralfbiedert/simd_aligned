@@ -1,4 +1,4 @@
-use super::Simd;
+use crate::sealed::Simd;
 
 crate trait Container<T>
 where
