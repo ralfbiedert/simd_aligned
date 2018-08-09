@@ -298,10 +298,10 @@ where
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::{ColumnOptimized, RowOptimized, SimdMatrix};
     use crate::*;
-    use std::ops::Range;
 
     #[test]
     fn allocation_size() {

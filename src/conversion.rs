@@ -71,9 +71,10 @@ where
     simd_container_flat_slice_mut(data, data.len() * T::LANES)
 }
 
+#[cfg(test)]
 mod test {
     use super::{packed_as_flat, packed_as_flat_mut};
-    use crate::f32x4;
+    use packed_simd::*;
 
     #[test]
     fn slice_flattening() {

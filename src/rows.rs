@@ -70,10 +70,10 @@ where
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::SimdRows;
     use crate::f32x4;
-    use std::ops::Range;
 
     #[test]
     fn allocation_size() {

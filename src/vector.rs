@@ -193,10 +193,10 @@ where
 //     }
 // }
 
+#[cfg(test)]
 mod test {
     use super::SimdVector;
     use crate::f32x4;
-    use std::ops::Range;
 
     #[test]
     fn allocation_size() {

@@ -83,8 +83,6 @@ pub use crate::matrix::{
 };
 pub use crate::vector::SimdVector;
 
-use crate::sealed::*;
-
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
         impl crate::sealed::Simd for $simd {
