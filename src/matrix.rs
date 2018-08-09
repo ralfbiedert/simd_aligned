@@ -116,7 +116,7 @@ where
     }
 
     #[inline]
-    pub fn row_iter(&self) -> SimdMatrixIter<T, O> {
+    pub fn row_iter(&self) -> SimdMatrixIter<'_, T, O> {
         O::assert_row();
 
         SimdMatrixIter {
@@ -153,7 +153,7 @@ where
     }
 
     #[inline]
-    pub fn column_iter(&self) -> SimdMatrixIter<T, O> {
+    pub fn column_iter(&self) -> SimdMatrixIter<'_, T, O> {
         O::assert_column();
 
         SimdMatrixIter {
