@@ -1,4 +1,4 @@
-use crate::sealed::Simd;
+use crate::traits::Simd;
 
 #[inline]
 crate fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]

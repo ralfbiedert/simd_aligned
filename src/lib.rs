@@ -82,8 +82,9 @@ mod container;
 mod conversion;
 mod matrix;
 mod rows;
-mod sealed;
 mod vector;
+
+pub mod traits;
 
 use packed_simd::*;
 
@@ -97,7 +98,7 @@ pub use crate::vector::SimdVector;
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
-        impl crate::sealed::Simd for $simd {
+        impl crate::traits::Simd for $simd {
             type Element = $element;
             const LANES: usize = $lanes;
             type LanesType = $lanestype;

@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use crate::sealed::Simd;
+use crate::traits::Simd;
 
 use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};

@@ -1,6 +1,7 @@
+//! Unified views on SIMD types.
+
 /// This is mostly copy-paste from `packed_simd`, where this trait is unfortunately
 /// sealed right now. In the future this might come from `std::simd`.
-#[doc(hidden)]
 pub trait Simd {
     /// Element type of the SIMD vector
     type Element;
