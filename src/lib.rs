@@ -61,6 +61,18 @@
 //! test vectors::scalar       ... bench:       1,177 ns/iter (+/- 464)
 //! test vectors::simd_aligned ... bench:          71 ns/iter (+/- 5)
 //! ```
+//!
+//! # FAQ
+//!
+//! ### How does it relate to [faster](https://github.com/AdamNiederer/faster) and [std::simd](https://github.com/rust-lang-nursery/packed_simd/)?
+//!
+//! * `simd_aligned` builds on top of `std::simd`. At aims to provide common, SIMD-aligned
+//! data structure that support simple and safe scalar access patterns.
+//!
+//! * `faster` (as of today) is really good if you already have exiting flat slices in your code
+//! and want operate them "full SIMD ahead". However, in particular when dealing with multiple
+//! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
+//! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
 #![feature(try_from, stdsimd, rust_2018_preview)]
 #![warn(rust_2018_idioms)]
