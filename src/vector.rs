@@ -17,7 +17,7 @@ use super::rows::SimdRows;
 /// // Create a vector of f64x__ elements that, in total, will hold space
 /// // for at least 4 f64 values. Internally this might be one f64x4, two f64x2,
 /// // or one f64x8 where the 2nd half is hidden, depending on the current architecture.
-/// let mut v = SimdVector::<f64s>::with(0_f64, 8);
+/// let mut v = SimdVector::<f64s>::with(0_f64, 4);
 ///
 /// // Get a 'flat view' (&[f64]) into the SIMD vectors and fill it.
 /// v.flat_mut().clone_from_slice(&[0.0, 1.0, 2.0, 3.0]);

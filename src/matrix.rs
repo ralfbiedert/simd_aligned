@@ -75,7 +75,7 @@ impl OptimizationStrategy for ColumnOptimized {
 ///
 /// // However, you can always get a flat view of the matrix, for "scalar-speed"
 /// // query and update all elements:
-/// let m_flat = m.flat_mut();
+/// let mut m_flat = m.flat_mut();
 ///
 /// m_flat[(2, 4)] = 42_f32;
 /// ```
@@ -359,8 +359,10 @@ mod test {
         let r1 = m_5_5_r.row(3);
         let r2 = m_5_5_r.row(4);
 
+        let mut sum = f32x4::splat(0_f32);
+
         for (x, y) in r1.iter().zip(r2) {
-            *x + *y;
+            sum += *x + *y;
         }
 
         assert_eq!(count, 10);

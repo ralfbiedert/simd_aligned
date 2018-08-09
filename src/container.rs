@@ -37,7 +37,7 @@ impl<T> Container<T> for [T; 4]
 where
     T: Simd + Clone + Copy,
 {
-    fn with(default: T, size: usize) -> Self {
+    fn with(default: T, _size: usize) -> Self {
         [default; 4]
     }
 
