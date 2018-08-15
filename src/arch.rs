@@ -36,7 +36,26 @@ macro_rules! impl_vecs {
     };
 }
 
-mod x86 {
+//     // TODO: Implement heuristics for architecture / target features.
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+pub mod myarch {
+    impl_vecs!(
+        super::u8x32,
+        super::i8x32,
+        super::u16x16,
+        super::i16x16,
+        super::u32x8,
+        super::i32x8,
+        super::u64x4,
+        super::i64x4,
+        super::f32x8,
+        super::f64x4
+    );
+}
+
+#[cfg(any(target_arch = "aarch64"))]
+pub mod myarch {
     impl_vecs!(
         super::u8x16,
         super::i8x16,
@@ -46,12 +65,31 @@ mod x86 {
         super::i32x4,
         super::u64x2,
         super::i64x2,
-        super::f32x8,
-        super::f64x4
+        super::f32x4,
+        super::f64x2
     );
 }
 
+#[cfg(
+    not(
+        any(
+            target_arch = "x86",
+            target_arch = "x86_64",
+            target_arch = "aarch64"
+        )
+    )
+)]
 pub mod myarch {
-    // TODO: Implement heuristics for architecture / target features.
-    pub use super::x86::*;
+    impl_vecs!(
+        super::u8x16,
+        super::i8x16,
+        super::u16x8,
+        super::i16x8,
+        super::u32x4,
+        super::i32x4,
+        super::u64x2,
+        super::i64x2,
+        super::f32x4,
+        super::f64x2
+    );
 }
