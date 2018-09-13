@@ -1,5 +1,3 @@
-cargo-features = ["edition"]
-
 [package]
 name = "simd_aligned"
 description="Safe and fast SIMD-aligned data structures with easy and transparent 'flat' access."
@@ -19,4 +17,4 @@ maintenance = { status = "experimental" }
 
 
 [dependencies]
-packed_simd = "0.1"
+packed_simd = "0.3"

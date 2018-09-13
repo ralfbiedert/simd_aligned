@@ -74,7 +74,7 @@
 //! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
 //! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
-#![feature(try_from, stdsimd, rust_2018_preview)]
+#![feature(try_from, stdsimd, crate_visibility_modifier)]
 #![warn(rust_2018_idioms)]
 
 mod arch;
@@ -90,10 +90,7 @@ use packed_simd::*;
 
 pub use crate::arch::myarch::*;
 pub use crate::conversion::{packed_as_flat, packed_as_flat_mut};
-pub use crate::matrix::{
-    ColumnOptimized, OptimizationStrategy, RowOptimized, SimdMatrix, SimdMatrixFlat,
-    SimdMatrixFlatMut,
-};
+pub use crate::matrix::{ColumnOptimized, OptimizationStrategy, RowOptimized, SimdMatrix, SimdMatrixFlat, SimdMatrixFlatMut};
 pub use crate::vector::SimdVector;
 
 macro_rules! impl_simd {
