@@ -62,9 +62,9 @@ There is no performance penalty for using `simd_aligned`, while retaining all th
 simplicity of handling flat arrays.
 
 ```
-test vectors::packed       ... bench:          77 ns/iter (+/- 4)
-test vectors::scalar       ... bench:       1,177 ns/iter (+/- 464)
-test vectors::simd_aligned ... bench:          71 ns/iter (+/- 5)
+test vectors::packed       ... bench:         202 ns/iter (+/- 3)
+test vectors::scalar       ... bench:       1,586 ns/iter (+/- 85)
+test vectors::simd_aligned ... bench:         201 ns/iter (+/- 10)
 ```
 
 

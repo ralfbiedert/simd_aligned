@@ -2,12 +2,11 @@
 name = "simd_aligned"
 description="Safe and fast SIMD-aligned data structures with easy and transparent 'flat' access."
 repository = "https://github.com/ralfbiedert/simd_aligned_rust"
-version = "0.1.3"
+version = "0.1.4"
 readme = "README.md"
 categories = ["data-structures"]
 keywords = ["simd", "memory", "aligned"]
 license = "MIT"
-
 authors = ["Ralf Biedert <rb@xr.io>"]
 edition = "2018"
 
