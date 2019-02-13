@@ -2,7 +2,7 @@
 name = "simd_aligned"
 description="Safe and fast SIMD-aligned data structures with easy and transparent 'flat' access."
 repository = "https://github.com/ralfbiedert/simd_aligned_rust"
-version = "0.1.4"
+version = "0.1.5"
 readme = "README.md"
 categories = ["data-structures"]
 keywords = ["simd", "memory", "aligned"]
@@ -17,3 +17,10 @@ maintenance = { status = "experimental" }
 
 [dependencies]
 packed_simd = "0.3"
+
+[dev-dependencies]
+criterion = "0.2"
+
+[[bench]]
+name = "benchmarks"
+harness = false
