@@ -74,8 +74,12 @@
 //! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
 //! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
-#![feature(try_from, stdsimd, crate_visibility_modifier)]
-#![warn(rust_2018_idioms)]
+#![feature(try_from, stdsimd)]
+
+#![warn(clippy::all)] // Enable ALL the warnings ...
+#![warn(clippy::nursery)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::cargo)]
 
 mod arch;
 mod container;

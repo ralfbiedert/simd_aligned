@@ -85,7 +85,7 @@ where
     T: Simd + Default + Clone,
     O: OptimizationStrategy,
 {
-    crate simd_rows: SimdRows<T, Vec<T>>,
+    pub(crate) simd_rows: SimdRows<T, Vec<T>>,
     phantom: PhantomData<O>,
 }
 
@@ -273,10 +273,10 @@ where
     O: OptimizationStrategy,
 {
     /// Reference to the matrix we iterate over.
-    crate matrix: &'a SimdMatrix<T, O>,
+    pub(crate) matrix: &'a SimdMatrix<T, O>,
 
     /// Current index of vector iteration.
-    crate index: usize,
+    pub(crate) index: usize,
 }
 
 impl<'a, T, O> Iterator for SimdMatrixIter<'a, T, O>

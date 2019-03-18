@@ -1,7 +1,7 @@
 use crate::traits::Simd;
 
 #[inline]
-crate fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]
+pub(crate) fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]
 where
     T: Simd + Default + Clone,
 {
@@ -20,7 +20,7 @@ where
 }
 
 #[inline]
-crate fn simd_container_flat_slice_mut<T>(data: &mut [T], length: usize) -> &mut [T::Element]
+pub(crate) fn simd_container_flat_slice_mut<T>(data: &mut [T], length: usize) -> &mut [T::Element]
 where
     T: Simd + Default + Clone,
 {

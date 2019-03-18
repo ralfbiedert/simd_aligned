@@ -6,15 +6,15 @@ use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 
 #[derive(Clone, Debug)]
-crate struct SimdRows<T, C>
+pub(crate) struct SimdRows<T, C>
 where
     T: Simd + Default + Clone,
     C: Container<T>,
 {
-    crate rows: usize,
-    crate row_length: usize,
-    crate vectors_per_row: usize,
-    crate data: C,
+    pub(crate) rows: usize,
+    pub(crate) row_length: usize,
+    pub(crate) vectors_per_row: usize,
+    pub(crate) data: C,
     phantom: PhantomData<T>, // Do we actually need this / is there a better way?
 }
 
@@ -24,7 +24,7 @@ where
     C: Container<T>,
 {
     #[inline]
-    crate fn with(default: T, rows: usize, row_length: usize) -> SimdRows<T, C> {
+    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> SimdRows<T, C> {
         let vectors_per_row = match (row_length / T::LANES, row_length % T::LANES) {
             (x, 0) => x,
             (x, _) => x + 1,
@@ -41,20 +41,20 @@ where
 
     /// Computes an offset for a vector and attribute.
     #[inline]
-    crate fn row_start_offset(&self, row: usize) -> usize {
+    pub(crate) fn row_start_offset(&self, row: usize) -> usize {
         row * self.vectors_per_row
     }
 
     /// Returns the range of SIMD vectors for the given row.
     #[inline]
-    crate fn range_for_row(&self, row: usize) -> Range<usize> {
+    pub(crate) fn range_for_row(&self, row: usize) -> Range<usize> {
         let start = self.row_start_offset(row);
         let end = start + self.vectors_per_row;
         start..end
     }
 
     #[inline]
-    crate fn row_as_flat_mut(&mut self, row: usize) -> &mut [T::Element] {
+    pub(crate) fn row_as_flat_mut(&mut self, row: usize) -> &mut [T::Element] {
         let range = self.range_for_row(row);
         let slice = self.data.slice_mut();
 
@@ -62,7 +62,7 @@ where
     }
 
     #[inline]
-    crate fn row_as_flat(&self, row: usize) -> &[T::Element] {
+    pub(crate) fn row_as_flat(&self, row: usize) -> &[T::Element] {
         let range = self.range_for_row(row);
         let slice = self.data.slice();
 

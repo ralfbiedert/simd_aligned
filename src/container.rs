@@ -1,6 +1,6 @@
 use crate::traits::Simd;
 
-crate trait Container<T>
+pub(crate) trait Container<T>
 where
     T: Simd + Clone,
 {

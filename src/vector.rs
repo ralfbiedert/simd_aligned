@@ -28,7 +28,7 @@ pub struct SimdVector<T>
 where
     T: Simd + Default + Clone,
 {
-    crate simd_rows: SimdRows<T, Vec<T>>,
+    pub(crate) simd_rows: SimdRows<T, Vec<T>>,
 }
 
 impl<T> SimdVector<T>
@@ -105,10 +105,10 @@ where
     T: Simd + Default + Clone,
 {
     /// Reference to the matrix we iterate over.
-    crate vector: &'a SimdVector<T>,
+    pub(crate) vector: &'a SimdVector<T>,
 
     /// Current index of vector iteration.
-    crate index: usize,
+    pub(crate) index: usize,
 }
 
 // #[derive(Debug)]
@@ -117,10 +117,10 @@ where
 //     T: Simd + Default + Clone,
 // {
 //     /// Reference to the matrix we iterate over.
-//     crate vector: &'a mut SimdVector<T>,
+//     pub(crate) vector: &'a mut SimdVector<T>,
 
 //     /// Current index of vector iteration.
-//     crate index: usize,
+//     pub(crate) index: usize,
 // }
 
 // impl<'a, T> Iterator for SimdVectorIter<'a, T>
