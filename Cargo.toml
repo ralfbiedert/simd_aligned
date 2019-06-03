@@ -15,9 +15,6 @@ travis-ci = { repository = "ralfbiedert/simd_aligned_rust" }
 maintenance = { status = "experimental" }
 
 
-[dependencies]
-packed_simd = "0.3"
-
 [dev-dependencies]
 criterion = "0.2"
 

@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut};
 
-use crate::traits::Simd;
-
-use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 use super::rows::SimdRows;
 
@@ -369,7 +366,6 @@ mod test {
     }
 
     #[test]
-
     fn flattened() {
         let mut m_1_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 5);
         let mut m_1_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 5);

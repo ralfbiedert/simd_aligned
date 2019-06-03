@@ -1,8 +1,5 @@
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use crate::traits::Simd;
-
-use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 use super::rows::SimdRows;
 
@@ -110,88 +107,6 @@ where
     /// Current index of vector iteration.
     pub(crate) index: usize,
 }
-
-// #[derive(Debug)]
-// pub struct SimdVectorIterMut<'a, T: 'a>
-// where
-//     T: Simd + Default + Clone,
-// {
-//     /// Reference to the matrix we iterate over.
-//     pub(crate) vector: &'a mut SimdVector<T>,
-
-//     /// Current index of vector iteration.
-//     pub(crate) index: usize,
-// }
-
-// impl<'a, T> Iterator for SimdVectorIter<'a, T>
-// where
-//     T: Simd + Default + Clone,
-// {
-//     type Item = &'a T;
-
-//     #[inline]
-//     fn next(&mut self) -> Option<Self::Item> {
-//         if self.index >= self.vector.simd_rows.vectors_per_row {
-//             None
-//         } else {
-//             let rval = Some(&self.vector.simd_rows.data[self.index]);
-//             self.index += 1;
-//             rval
-//         }
-//     }
-// }
-
-// impl<'a, T> Iterator for SimdVectorIterMut<'a, T>
-// where
-//     T: Simd + Default + Clone,
-// {
-//     type Item = &'a mut T;
-
-//     #[inline]
-//     fn next(&mut self) -> Option<Self::Item> {
-//         let index = self.index;
-
-//         return None;
-
-//         // if index >= self.vector.simd_rows.vectors_per_row {
-//         //     return None;
-//         // }
-
-//         // self.index += 1;
-//         // let rval = Some(&mut self.vector.simd_rows.data[index]);
-//         // rval
-//     }
-// }
-
-// impl<'a, T> IntoIterator for &'a SimdVector<T>
-// where
-//     T: Simd + Default + Clone,
-// {
-//     type Item = &'a T;
-//     type IntoIter = SimdVectorIter<'a, T>;
-
-//     fn into_iter(self) -> Self::IntoIter {
-//         SimdVectorIter {
-//             vector: &self,
-//             index: 0,
-//         }
-//     }
-// }
-
-// impl<'a, T> IntoIterator for &'a mut SimdVector<T>
-// where
-//     T: Simd + Default + Clone,
-// {
-//     type Item = &'a mut T;
-//     type IntoIter = SimdVectorIterMut<'a, T>;
-
-//     fn into_iter(self) -> Self::IntoIter {
-//         SimdVectorIterMut {
-//             vector: self,
-//             index: 0,
-//         }
-//     }
-// }
 
 #[cfg(test)]
 mod test {
