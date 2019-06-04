@@ -79,7 +79,7 @@
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
 
-//mod conversion;
+mod conversion;
 //mod matrix;
 mod rows;
 //mod vector;
@@ -90,22 +90,27 @@ mod rows;
 
 
 #[repr(align(8))]
-pub struct AlignF32x2;
+#[derive(Default, Copy, Clone)]
+pub struct F32x2;
 
 #[repr(align(16))]
-pub struct AlignF64x2;
+#[derive(Default, Copy, Clone)]
+pub struct F64x2;
 
-trait TTRAIT {
-    type X;
+pub trait Alignment {
+    type Type;
+    
     fn align() -> usize;
 }
 
-impl TTRAIT for AlignF32x2 {
-    type X = f32;
+impl Alignment for F32x2 {
+    type Type = f32;
     
     fn align() -> usize {
         8
     }
 }
+
+
 
 
