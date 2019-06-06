@@ -1,11 +1,12 @@
-use std::{marker::PhantomData, ops::Range};
+use std::{ops::Range};
 
 use crate::traits::Simd;
 
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 
+
 #[derive(Clone, Debug)]
-pub(crate) struct SimdRows<T>
+pub(crate) struct PackedMxN<T>
 where
     T: Simd + Default + Clone,
 {
@@ -13,25 +14,23 @@ where
     pub(crate) row_length: usize,
     pub(crate) vectors_per_row: usize,
     pub(crate) data: Vec<T>,
-    phantom: PhantomData<T>, // Do we actually need this / is there a better way?
 }
 
-impl<T> SimdRows<T>
+impl<T> PackedMxN<T>
 where
     T: Simd + Default + Clone,
 {
     #[inline]
-    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> SimdRows<T> {
+    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> PackedMxN<T> {
         let vectors_per_row = match (row_length / T::LANES, row_length % T::LANES) {
             (x, 0) => x,
             (x, _) => x + 1,
         };
 
-        SimdRows {
+        PackedMxN {
             rows,
             row_length,
             vectors_per_row,
-            phantom: PhantomData,
             data: vec![default; vectors_per_row * rows],
         }
     }
@@ -66,7 +65,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::SimdRows;
+    use super::PackedMxN;
     use crate::f32x4;
 //
 //    #[test]
@@ -79,8 +78,8 @@ mod test {
     
     #[test]
     fn allocation_size() {
-        let r_1 = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 1, 4);
-        let r_2 = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 1, 5);
+        let r_1 = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 1, 4);
+        let r_2 = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 1, 5);
 
         assert_eq!(r_1.data.len(), 1);
         assert_eq!(r_2.data.len(), 2);
@@ -88,7 +87,7 @@ mod test {
 
     #[test]
     fn start_offset() {
-        let r = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 16, 16);
+        let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
 
         assert_eq!(r.row_start_offset(0), 0);
         assert_eq!(r.row_start_offset(1), 4);
@@ -96,14 +95,14 @@ mod test {
 
     #[test]
     fn range() {
-        let r = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 16, 16);
+        let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
 
         assert_eq!(r.range_for_row(2), 8..12);
     }
 
     #[test]
     fn slice() {
-        let r = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 16, 16);
+        let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
 
         let s = r.row_as_flat(1);
         assert_eq!(s.len(), 16);
@@ -111,7 +110,7 @@ mod test {
 
     #[test]
     fn slice_mut() {
-        let mut r = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 16, 16);
+        let mut r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
         let s = r.row_as_flat_mut(1);
 
         assert_eq!(s.len(), 16);

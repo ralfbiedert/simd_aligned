@@ -27,8 +27,8 @@
 //! use simd_aligned::*;
 //!
 //! // Create vectors of `10` f64 elements with value `0.0`.
-//! let mut v1 = SimdVector::<f64s>::with(0.0, 10);
-//! let mut v2 = SimdVector::<f64s>::with(0.0, 10);
+//! let mut v1 = VecN::<f64s>::with(0.0, 10);
+//! let mut v2 = VecN::<f64s>::with(0.0, 10);
 //!
 //! // Get "flat", mutable view of the vector, and set individual elements:
 //! let v1_m = v1.flat_mut();
@@ -74,8 +74,6 @@
 //! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
 //! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
-#![feature(try_from, stdsimd)]
-
 #![warn(clippy::all)] // Enable ALL the warnings ...
 #![warn(clippy::nursery)]
 #![warn(clippy::pedantic)]
@@ -93,8 +91,8 @@ use packed_simd::*;
 
 pub use crate::arch::myarch::*;
 pub use crate::conversion::{packed_as_flat, packed_as_flat_mut};
-pub use crate::matrix::{ColumnOptimized, OptimizationStrategy, RowOptimized, SimdMatrix, SimdMatrixFlat, SimdMatrixFlatMut};
-pub use crate::vector::SimdVector;
+pub use crate::matrix::{AlignColumn, AlignmentStrategy, AlignRow, Matrix2D, SimdMatrixFlat, SimdMatrixFlatMut};
+pub use crate::vector::VecN;
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {

@@ -4,10 +4,10 @@ use std::ops::{Index, IndexMut};
 use crate::traits::Simd;
 
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-use super::rows::SimdRows;
+use super::rows::PackedMxN;
 
 #[doc(hidden)]
-pub trait OptimizationStrategy {
+pub trait AlignmentStrategy {
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize);
 
     fn assert_column();
@@ -17,13 +17,13 @@ pub trait OptimizationStrategy {
 
 #[derive(Clone, Debug)]
 #[doc(hidden)]
-pub struct RowOptimized;
+pub struct AlignRow;
 
 #[derive(Clone, Debug)]
 #[doc(hidden)]
-pub struct ColumnOptimized;
+pub struct AlignColumn;
 
-impl OptimizationStrategy for RowOptimized {
+impl AlignmentStrategy for AlignRow {
     #[inline]
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
         (x, y)
@@ -36,7 +36,7 @@ impl OptimizationStrategy for RowOptimized {
     }
 }
 
-impl OptimizationStrategy for ColumnOptimized {
+impl AlignmentStrategy for AlignColumn {
     #[inline]
     fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
         (y, x)
@@ -63,7 +63,7 @@ impl OptimizationStrategy for ColumnOptimized {
 /// use simd_aligned::*;
 ///
 /// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.
-/// let mut m = SimdMatrix::<f32s, RowOptimized>::with_dimension(10, 5);
+/// let mut m = Matrix2D::<f32s, AlignRow>::with_dimension(10, 5);
 ///
 /// // A `RowOptimized` matrix provides `row` access. In this example, you could query
 /// // rows `0` to `9` and receive vectors that can hold a total of at least `5` elements.
@@ -79,26 +79,26 @@ impl OptimizationStrategy for ColumnOptimized {
 /// m_flat[(2, 4)] = 42_f32;
 /// ```
 #[derive(Clone, Debug)]
-pub struct SimdMatrix<T, O>
+pub struct Matrix2D<T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
-    pub(crate) simd_rows: SimdRows<T>,
+    pub(crate) simd_rows: PackedMxN<T>,
     phantom: PhantomData<O>,
 }
 
-impl<T, O> SimdMatrix<T, O>
+impl<T, O> Matrix2D<T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     #[inline]
     pub fn with_dimension(width: usize, height: usize) -> Self {
         let (x, y) = O::translate_indices_to_simdrows(width, height);
 
-        SimdMatrix {
-            simd_rows: SimdRows::with(T::default(), x, y),
+        Matrix2D {
+            simd_rows: PackedMxN::with(T::default(), x, y),
             phantom: PhantomData,
         }
     }
@@ -202,9 +202,9 @@ where
 pub struct SimdMatrixFlat<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
-    matrix: &'a SimdMatrix<T, O>,
+    matrix: &'a Matrix2D<T, O>,
     phantom: PhantomData<O>, // Do we actually need this / is there a better way?
 }
 
@@ -212,16 +212,16 @@ where
 pub struct SimdMatrixFlatMut<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
-    matrix: &'a mut SimdMatrix<T, O>,
+    matrix: &'a mut Matrix2D<T, O>,
     phantom: PhantomData<O>, // Do we actually need this / is there a better way?
 }
 
 impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlat<'a, T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     type Output = T::Element;
 
@@ -237,7 +237,7 @@ where
 impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     type Output = T::Element;
 
@@ -253,7 +253,7 @@ where
 impl<'a, T, O> IndexMut<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     #[inline]
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
@@ -269,10 +269,10 @@ where
 pub struct SimdMatrixIter<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     /// Reference to the matrix we iterate over.
-    pub(crate) matrix: &'a SimdMatrix<T, O>,
+    pub(crate) matrix: &'a Matrix2D<T, O>,
 
     /// Current index of vector iteration.
     pub(crate) index: usize,
@@ -281,7 +281,7 @@ where
 impl<'a, T, O> Iterator for SimdMatrixIter<'a, T, O>
 where
     T: Simd + Default + Clone,
-    O: OptimizationStrategy,
+    O: AlignmentStrategy,
 {
     type Item = &'a [T];
 
@@ -299,22 +299,22 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{ColumnOptimized, RowOptimized, SimdMatrix};
+    use super::{AlignColumn, AlignRow, Matrix2D};
     use crate::*;
 
     #[test]
     fn allocation_size() {
-        let m_1_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 1);
-        let m_1_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 1);
+        let m_1_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 1);
+        let m_1_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 1);
 
-        let m_5_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 5);
-        let m_5_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 5);
+        let m_5_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 5);
+        let m_5_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 5);
 
-        let m_1_4_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 4);
-        let m_4_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(4, 1);
+        let m_1_4_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 4);
+        let m_4_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(4, 1);
 
-        let m_4_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(4, 1);
-        let m_1_4_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 4);
+        let m_4_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(4, 1);
+        let m_1_4_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 4);
 
         assert_eq!(m_1_1_r.simd_rows.data.len(), 1);
         assert_eq!(m_1_1_c.simd_rows.data.len(), 1);
@@ -332,8 +332,8 @@ mod test {
     #[test]
 
     fn access() {
-        let mut m_5_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 5);
-        let mut m_5_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 5);
+        let mut m_5_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 5);
+        let mut m_5_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 5);
 
         assert_eq!(m_5_5_c.column(0).len(), 2);
         assert_eq!(m_5_5_c.column_mut(0).len(), 2);
@@ -370,10 +370,10 @@ mod test {
     #[test]
 
     fn flattened() {
-        let mut m_1_5_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(1, 5);
-        let mut m_1_5_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(1, 5);
-        let mut m_5_1_c = SimdMatrix::<f32x4, ColumnOptimized>::with_dimension(5, 1);
-        let mut m_5_1_r = SimdMatrix::<f32x4, RowOptimized>::with_dimension(5, 1);
+        let mut m_1_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 5);
+        let mut m_1_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 5);
+        let mut m_5_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 1);
+        let mut m_5_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 1);
 
         let mut m_1_5_r_flat = m_1_5_r.flat_mut();
         let mut m_1_5_c_flat = m_1_5_c.flat_mut();

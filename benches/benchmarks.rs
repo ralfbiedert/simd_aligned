@@ -34,8 +34,8 @@ fn criterion_benchmark(c: &mut Criterion) {
                     });
                 })
                 .with_function("simd_aligned", |b| {
-                    let x = SimdVector::<u8x16>::with(6_u8, 1024);
-                    let y = SimdVector::<u8x16>::with(4_u8, 1024);
+                    let x = VecN::<u8x16>::with(6_u8, 1024);
+                    let y = VecN::<u8x16>::with(4_u8, 1024);
     
                     b.iter(|| {
                         let mut z = vec![u8x16::splat(0); 64];
