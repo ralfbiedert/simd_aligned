@@ -2,29 +2,26 @@ use std::{marker::PhantomData, ops::Range};
 
 use crate::traits::Simd;
 
-use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 
 #[derive(Clone, Debug)]
-pub(crate) struct SimdRows<T, C>
+pub(crate) struct SimdRows<T>
 where
     T: Simd + Default + Clone,
-    C: Container<T>,
 {
     pub(crate) rows: usize,
     pub(crate) row_length: usize,
     pub(crate) vectors_per_row: usize,
-    pub(crate) data: C,
+    pub(crate) data: Vec<T>,
     phantom: PhantomData<T>, // Do we actually need this / is there a better way?
 }
 
-impl<T, C> SimdRows<T, C>
+impl<T> SimdRows<T>
 where
     T: Simd + Default + Clone,
-    C: Container<T>,
 {
     #[inline]
-    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> SimdRows<T, C> {
+    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> SimdRows<T> {
         let vectors_per_row = match (row_length / T::LANES, row_length % T::LANES) {
             (x, 0) => x,
             (x, _) => x + 1,
@@ -35,7 +32,7 @@ where
             row_length,
             vectors_per_row,
             phantom: PhantomData,
-            data: C::with(default, vectors_per_row * rows),
+            data: vec![default; vectors_per_row * rows],
         }
     }
 
@@ -56,17 +53,14 @@ where
     #[inline]
     pub(crate) fn row_as_flat_mut(&mut self, row: usize) -> &mut [T::Element] {
         let range = self.range_for_row(row);
-        let slice = self.data.slice_mut();
 
-        simd_container_flat_slice_mut(&mut slice[range], self.row_length)
+        simd_container_flat_slice_mut(&mut self.data[range], self.row_length)
     }
 
     #[inline]
     pub(crate) fn row_as_flat(&self, row: usize) -> &[T::Element] {
         let range = self.range_for_row(row);
-        let slice = self.data.slice();
-
-        simd_container_flat_slice(&slice[range], self.row_length)
+        simd_container_flat_slice(&self.data[range], self.row_length)
     }
 }
 
@@ -74,7 +68,15 @@ where
 mod test {
     use super::SimdRows;
     use crate::f32x4;
-
+//
+//    #[test]
+//    fn xxx() {
+//        let r_1 = SimdRows::<f32x4, [f32; 4]>::with(f32x4::splat(0.0), 1, 4);
+//
+//        assert_eq!(r_1.data.len(), 1);
+//    }
+//
+    
     #[test]
     fn allocation_size() {
         let r_1 = SimdRows::<f32x4, Vec<_>>::with(f32x4::splat(0.0), 1, 4);

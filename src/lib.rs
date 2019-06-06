@@ -82,7 +82,6 @@
 #![warn(clippy::cargo)]
 
 mod arch;
-mod container;
 mod conversion;
 mod matrix;
 mod rows;

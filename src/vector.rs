@@ -2,7 +2,6 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 use crate::traits::Simd;
 
-use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 use super::rows::SimdRows;
 
@@ -28,7 +27,7 @@ pub struct SimdVector<T>
 where
     T: Simd + Default + Clone,
 {
-    pub(crate) simd_rows: SimdRows<T, Vec<T>>,
+    pub(crate) simd_rows: SimdRows<T>,
 }
 
 impl<T> SimdVector<T>
@@ -46,13 +45,13 @@ where
     /// Get a flat view for this [SimdVector].
     #[inline]
     pub fn flat(&self) -> &[T::Element] {
-        simd_container_flat_slice(self.simd_rows.data.slice(), self.simd_rows.row_length)
+        simd_container_flat_slice(&self.simd_rows.data[..], self.simd_rows.row_length)
     }
 
     /// Get a flat, mutable view for this [SimdVector].
     #[inline]
     pub fn flat_mut(&mut self) -> &mut [T::Element] {
-        simd_container_flat_slice_mut(self.simd_rows.data.slice_mut(), self.simd_rows.row_length)
+        simd_container_flat_slice_mut(&mut self.simd_rows.data[..], self.simd_rows.row_length)
     }
 }
 

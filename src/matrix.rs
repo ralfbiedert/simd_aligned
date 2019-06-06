@@ -3,7 +3,6 @@ use std::ops::{Index, IndexMut};
 
 use crate::traits::Simd;
 
-use super::container::Container;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 use super::rows::SimdRows;
 
@@ -85,7 +84,7 @@ where
     T: Simd + Default + Clone,
     O: OptimizationStrategy,
 {
-    pub(crate) simd_rows: SimdRows<T, Vec<T>>,
+    pub(crate) simd_rows: SimdRows<T>,
     phantom: PhantomData<O>,
 }
 
@@ -112,7 +111,7 @@ where
     pub fn row(&self, i: usize) -> &[T] {
         O::assert_row();
         let range = self.simd_rows.range_for_row(i);
-        &self.simd_rows.data.slice()[range]
+        &self.simd_rows.data[range]
     }
 
     #[inline]
@@ -129,7 +128,7 @@ where
     pub fn row_mut(&mut self, i: usize) -> &mut [T] {
         O::assert_row();
         let range = self.simd_rows.range_for_row(i);
-        &mut self.simd_rows.data.slice_mut()[range]
+        &mut self.simd_rows.data[range]
     }
 
     #[inline]
@@ -149,7 +148,7 @@ where
     pub fn column(&self, i: usize) -> &[T] {
         O::assert_column();
         let range = self.simd_rows.range_for_row(i);
-        &self.simd_rows.data.slice()[range]
+        &self.simd_rows.data[range]
     }
 
     #[inline]
@@ -166,7 +165,7 @@ where
     pub fn column_mut(&mut self, i: usize) -> &mut [T] {
         O::assert_column();
         let range = self.simd_rows.range_for_row(i);
-        &mut self.simd_rows.data.slice_mut()[range]
+        &mut self.simd_rows.data[range]
     }
 
     #[inline]
