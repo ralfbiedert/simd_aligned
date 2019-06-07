@@ -1,7 +1,6 @@
 use std::{ops::Range};
 
-use crate::traits::Simd;
-
+use super::traits::Simd;
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
 
 
@@ -26,7 +25,7 @@ where
             (x, 0) => x,
             (x, _) => x + 1,
         };
-
+        
         PackedMxN {
             rows,
             row_length,
@@ -67,14 +66,6 @@ where
 mod test {
     use super::PackedMxN;
     use crate::f32x4;
-//
-//    #[test]
-//    fn xxx() {
-//        let r_1 = SimdRows::<f32x4, [f32; 4]>::with(f32x4::splat(0.0), 1, 4);
-//
-//        assert_eq!(r_1.data.len(), 1);
-//    }
-//
     
     #[test]
     fn allocation_size() {

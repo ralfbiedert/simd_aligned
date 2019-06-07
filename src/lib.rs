@@ -10,7 +10,7 @@
 //! * supports everything from `u8x2` to `f64x8`
 //! * think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x16]`)
 //! * defines `u8s`, ..., `f36s` as "best guess" for current platform (WIP)
-//! * provides N-dimensional [SimdVector] and NxM-dimensional [SimdMatrix].
+//! * provides N-dimensional [VectorD] and NxM-dimensional [MatrixD].
 //!
 //!
 //! **Note**: Right now this is an experimental crate. Features might be added or removed depending on how [std::simd](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
@@ -27,8 +27,8 @@
 //! use simd_aligned::*;
 //!
 //! // Create vectors of `10` f64 elements with value `0.0`.
-//! let mut v1 = VecN::<f64s>::with(0.0, 10);
-//! let mut v2 = VecN::<f64s>::with(0.0, 10);
+//! let mut v1 = VectorD::<f64s>::with(0.0, 10);
+//! let mut v2 = VectorD::<f64s>::with(0.0, 10);
 //!
 //! // Get "flat", mutable view of the vector, and set individual elements:
 //! let v1_m = v1.flat_mut();
@@ -79,20 +79,19 @@
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
 
-mod arch;
 mod conversion;
 mod matrix;
-mod rows;
+mod packed;
 mod vector;
 
+pub mod arch;
 pub mod traits;
 
 use packed_simd::*;
 
-pub use crate::arch::myarch::*;
 pub use crate::conversion::{packed_as_flat, packed_as_flat_mut};
-pub use crate::matrix::{AlignColumn, AlignmentStrategy, AlignRow, Matrix2D, SimdMatrixFlat, SimdMatrixFlatMut};
-pub use crate::vector::VecN;
+pub use crate::matrix::{Columns, AccessStrategy, Rows, MatrixD, MatrixFlat, MatrixFlatMut};
+pub use crate::vector::VectorD;
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
@@ -146,6 +145,8 @@ impl_simd!(i64x4, i64, 4, [i64; 4]);
 impl_simd!(f32x2, f32, 2, [f32; 2]);
 impl_simd!(f32x4, f32, 4, [f32; 4]);
 impl_simd!(f32x8, f32, 8, [f32; 8]);
+impl_simd!(f32x16, f32, 16, [f32; 16]);
 
 impl_simd!(f64x2, f64, 2, [f64; 2]);
 impl_simd!(f64x4, f64, 4, [f64; 4]);
+impl_simd!(f64x8, f64, 8, [f64; 8]);

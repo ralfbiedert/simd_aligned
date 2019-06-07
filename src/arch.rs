@@ -1,3 +1,5 @@
+//! Contains vector definitions with a fixed bit width.
+//!
 #![allow(non_camel_case_types)]
 
 use packed_simd::*;
@@ -36,60 +38,112 @@ macro_rules! impl_vecs {
     };
 }
 
+/// Vectors with fixed length of 128 bits.
+pub mod x128 {
+    impl_vecs!(
+        super::super::u8x16,
+        super::super::i8x16,
+        super::super::u16x8,
+        super::super::i16x8,
+        super::super::u32x4,
+        super::super::i32x4,
+        super::super::u64x2,
+        super::super::i64x2,
+        super::super::f32x4,
+        super::super::f64x2
+     );
+}
+
+/// Vectors with fixed length of 256 bits.
+pub mod x256 {
+    impl_vecs!(
+        super::super::u8x32,
+        super::super::i8x32,
+        super::super::u16x16,
+        super::super::i16x16,
+        super::super::u32x8,
+        super::super::i32x8,
+        super::super::u64x4,
+        super::super::i64x4,
+        super::super::f32x8,
+        super::super::f64x4
+     );
+}
+
+/// Vectors with fixed length of 512 bits.
+pub mod x512 {
+    impl_vecs!(
+        super::super::u8x64,
+        super::super::i8x64,
+        super::super::u16x32,
+        super::super::i16x32,
+        super::super::u32x16,
+        super::super::i32x16,
+        super::super::u64x8,
+        super::super::i64x8,
+        super::super::f32x16,
+        super::super::f64x8
+     );
+}
+
 //     // TODO: Implement heuristics for architecture / target features.
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub mod myarch {
-    impl_vecs!(
-        super::u8x32,
-        super::i8x32,
-        super::u16x16,
-        super::i16x16,
-        super::u32x8,
-        super::i32x8,
-        super::u64x4,
-        super::i64x4,
-        super::f32x8,
-        super::f64x4
-    );
+/// Vectors for the current architecture.
+pub mod current {
+    
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    mod current {
+        //! Vectors for the current arch.
+        impl_vecs!(
+            super::super::u8x32,
+            super::super::i8x32,
+            super::super::u16x16,
+            super::super::i16x16,
+            super::super::u32x8,
+            super::super::i32x8,
+            super::super::u64x4,
+            super::super::i64x4,
+            super::super::f32x8,
+            super::super::f64x4
+        );
+    }
+    
+    #[cfg(any(target_arch = "aarch64"))]
+    mod current {
+        impl_vecs!(
+            super::super::u8x16,
+            super::super::i8x16,
+            super::super::u16x8,
+            super::super::i16x8,
+            super::super::u32x4,
+            super::super::i32x4,
+            super::super::u64x2,
+            super::super::i64x2,
+            super::super::f32x4,
+            super::super::f64x2
+        );
+    }
+    
+    #[cfg(not(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "aarch64"
+    )))]
+    mod current {
+        impl_vecs!(
+            super::super::u8x16,
+            super::super::i8x16,
+            super::super::u16x8,
+            super::super::i16x8,
+            super::super::u32x4,
+            super::super::i32x4,
+            super::super::u64x2,
+            super::super::i64x2,
+            super::super::f32x4,
+            super::super::f64x2
+        );
+    }
+    
+    pub use current::*;
 }
 
-#[cfg(any(target_arch = "aarch64"))]
-pub mod myarch {
-    impl_vecs!(
-        super::u8x16,
-        super::i8x16,
-        super::u16x8,
-        super::i16x8,
-        super::u32x4,
-        super::i32x4,
-        super::u64x2,
-        super::i64x2,
-        super::f32x4,
-        super::f64x2
-    );
-}
-
-#[cfg(
-    not(
-        any(
-            target_arch = "x86",
-            target_arch = "x86_64",
-            target_arch = "aarch64"
-        )
-    )
-)]
-pub mod myarch {
-    impl_vecs!(
-        super::u8x16,
-        super::i8x16,
-        super::u16x8,
-        super::i16x8,
-        super::u32x4,
-        super::i32x4,
-        super::u64x2,
-        super::i64x2,
-        super::f32x4,
-        super::f64x2
-    );
-}

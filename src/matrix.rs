@@ -4,55 +4,40 @@ use std::ops::{Index, IndexMut};
 use crate::traits::Simd;
 
 use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-use super::rows::PackedMxN;
+use super::packed::PackedMxN;
+
 
 #[doc(hidden)]
-pub trait AlignmentStrategy {
-    fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize);
-
-    fn assert_column();
-
-    fn assert_row();
+pub trait AccessStrategy {
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize);
 }
 
 #[derive(Clone, Debug)]
 #[doc(hidden)]
-pub struct AlignRow;
+pub struct Rows;
 
 #[derive(Clone, Debug)]
 #[doc(hidden)]
-pub struct AlignColumn;
+pub struct Columns;
 
-impl AlignmentStrategy for AlignRow {
+impl AccessStrategy for Rows {
     #[inline]
-    fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
         (x, y)
     }
-
-    fn assert_row() {}
-
-    fn assert_column() {
-        panic!("Asserting the matrix is column-optimized but it is actually row-optimized.");
-    }
 }
 
-impl AlignmentStrategy for AlignColumn {
+impl AccessStrategy for Columns {
     #[inline]
-    fn translate_indices_to_simdrows(x: usize, y: usize) -> (usize, usize) {
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
         (y, x)
     }
-
-    fn assert_row() {
-        panic!("Asserting the matrix is row-optimized but it is actually column-optimized.");
-    }
-
-    fn assert_column() {}
 }
 
-/// A matrix with one axis aligned for fast and safe SIMD access that also provides a flat view on
-/// its data.
+/// A dynamic (heap allocated) matrix with one axis aligned for fast and safe SIMD access that
+/// also provides a flat view on its data.
 ///
-/// You can use [SimdMatrix] when you need to deal with multiple SIMD vectors, but
+/// You can use [MatrixD] when you need to deal with multiple SIMD vectors, but
 /// want them arranged in a compact cache-friendly manner. Internally this struct is backed by a
 /// continuous vector of aligned vectors, and dynamically sliced according to row / column access.
 ///
@@ -63,7 +48,7 @@ impl AlignmentStrategy for AlignColumn {
 /// use simd_aligned::*;
 ///
 /// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.
-/// let mut m = Matrix2D::<f32s, AlignRow>::with_dimension(10, 5);
+/// let mut m = MatrixD::<f32s, Rows>::with_dimension(10, 5);
 ///
 /// // A `RowOptimized` matrix provides `row` access. In this example, you could query
 /// // rows `0` to `9` and receive vectors that can hold a total of at least `5` elements.
@@ -79,64 +64,82 @@ impl AlignmentStrategy for AlignColumn {
 /// m_flat[(2, 4)] = 42_f32;
 /// ```
 #[derive(Clone, Debug)]
-pub struct Matrix2D<T, O>
+pub struct MatrixD<T, A>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
     pub(crate) simd_rows: PackedMxN<T>,
-    phantom: PhantomData<O>,
+    phantom: PhantomData<A>,
 }
 
-impl<T, O> Matrix2D<T, O>
+impl<T, O> MatrixD<T, O>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    O: AccessStrategy,
 {
     #[inline]
     pub fn with_dimension(width: usize, height: usize) -> Self {
-        let (x, y) = O::translate_indices_to_simdrows(width, height);
+        let (x, y) = O::flat_to_packed(width, height);
 
-        Matrix2D {
+        MatrixD {
             simd_rows: PackedMxN::with(T::default(), x, y),
             phantom: PhantomData,
         }
     }
 
     pub fn dimension(&self) -> (usize, usize) {
-        O::translate_indices_to_simdrows(self.simd_rows.rows, self.simd_rows.row_length)
+        O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length)
     }
 
-    #[inline]
-    pub fn row(&self, i: usize) -> &[T] {
-        O::assert_row();
-        let range = self.simd_rows.range_for_row(i);
-        &self.simd_rows.data[range]
-    }
 
     #[inline]
-    pub fn row_iter(&self) -> SimdMatrixIter<'_, T, O> {
-        O::assert_row();
-
-        SimdMatrixIter {
-            matrix: &self,
-            index: 0,
+    pub fn flat(&self) -> MatrixFlat<'_, T, O> {
+        MatrixFlat {
+            matrix: self,
+            phantom: PhantomData,
         }
     }
 
     #[inline]
+    pub fn flat_mut(&mut self) -> MatrixFlatMut<'_, T, O> {
+        MatrixFlatMut {
+            matrix: self,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<T> MatrixD<T, Rows>
+    where
+        T: Simd + Default + Clone,
+{
+    #[inline]
+    pub fn row(&self, i: usize) -> &[T] {
+        let range = self.simd_rows.range_for_row(i);
+        &self.simd_rows.data[range]
+    }
+    
+    #[inline]
+    pub fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> {
+        Matrix2DIter {
+            matrix: &self,
+            index: 0,
+        }
+    }
+    
+    #[inline]
     pub fn row_mut(&mut self, i: usize) -> &mut [T] {
-        O::assert_row();
         let range = self.simd_rows.range_for_row(i);
         &mut self.simd_rows.data[range]
     }
-
+    
     #[inline]
     pub fn row_as_flat(&self, i: usize) -> &[T::Element] {
         let row = self.row(i);
         simd_container_flat_slice(row, self.simd_rows.row_length)
     }
-
+    
     #[inline]
     pub fn row_as_flat_mut(&mut self, i: usize) -> &mut [T::Element] {
         let length = self.simd_rows.row_length;
@@ -144,120 +147,110 @@ where
         simd_container_flat_slice_mut(row, length)
     }
 
+}
+
+impl<T> MatrixD<T, Columns>
+    where
+        T: Simd + Default + Clone,
+{
+    
     #[inline]
     pub fn column(&self, i: usize) -> &[T] {
-        O::assert_column();
         let range = self.simd_rows.range_for_row(i);
         &self.simd_rows.data[range]
     }
-
+    
     #[inline]
-    pub fn column_iter(&self) -> SimdMatrixIter<'_, T, O> {
-        O::assert_column();
-
-        SimdMatrixIter {
+    pub fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> {
+        Matrix2DIter {
             matrix: &self,
             index: 0,
         }
     }
-
+    
     #[inline]
     pub fn column_mut(&mut self, i: usize) -> &mut [T] {
-        O::assert_column();
         let range = self.simd_rows.range_for_row(i);
         &mut self.simd_rows.data[range]
     }
-
+    
     #[inline]
     pub fn column_as_flat(&self, i: usize) -> &[T::Element] {
         let column = self.column(i);
         simd_container_flat_slice(column, self.simd_rows.row_length)
     }
-
+    
     #[inline]
     pub fn column_as_flat_mut(&mut self, i: usize) -> &mut [T::Element] {
         let length = self.simd_rows.row_length;
         let column = self.column_mut(i);
         simd_container_flat_slice_mut(column, length)
     }
-
-    #[inline]
-    pub fn flat(&self) -> SimdMatrixFlat<'_, T, O> {
-        SimdMatrixFlat {
-            matrix: self,
-            phantom: PhantomData,
-        }
-    }
-
-    #[inline]
-    pub fn flat_mut(&mut self) -> SimdMatrixFlatMut<'_, T, O> {
-        SimdMatrixFlatMut {
-            matrix: self,
-            phantom: PhantomData,
-        }
-    }
+    
 }
 
-/// Produced by [SimdMatrix::flat], this allow for flat matrix access.
-pub struct SimdMatrixFlat<'a, T: 'a, O: 'a>
+
+
+/// Produced by [`MatrixD::flat`], this allow for flat matrix access.
+pub struct MatrixFlat<'a, T: 'a, A: 'a>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
-    matrix: &'a Matrix2D<T, O>,
-    phantom: PhantomData<O>, // Do we actually need this / is there a better way?
+    matrix: &'a MatrixD<T, A>,
+    phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
-/// Provided by [SimdMatrix::flat_mut], this allow for flat, mutable matrix access.
-pub struct SimdMatrixFlatMut<'a, T: 'a, O: 'a>
+/// Provided by [`MatrixD::flat_mut`], this allow for flat, mutable matrix access.
+pub struct MatrixFlatMut<'a, T: 'a, A: 'a>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
-    matrix: &'a mut Matrix2D<T, O>,
-    phantom: PhantomData<O>, // Do we actually need this / is there a better way?
+    matrix: &'a mut MatrixD<T, A>,
+    phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
-impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlat<'a, T, O>
+impl<'a, T, A> Index<(usize, usize)> for MatrixFlat<'a, T, A>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
     type Output = T::Element;
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = A::flat_to_packed(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat(row);
 
         &row_slice[x]
     }
 }
 
-impl<'a, T, O> Index<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
+impl<'a, T, A> Index<(usize, usize)> for MatrixFlatMut<'a, T, A>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
     type Output = T::Element;
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = A::flat_to_packed(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat(row);
 
         &row_slice[x]
     }
 }
 
-impl<'a, T, O> IndexMut<(usize, usize)> for SimdMatrixFlatMut<'a, T, O>
+impl<'a, T, A> IndexMut<(usize, usize)> for MatrixFlatMut<'a, T, A>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    A: AccessStrategy,
 {
     #[inline]
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
-        let (row, x) = O::translate_indices_to_simdrows(index.0, index.1);
+        let (row, x) = A::flat_to_packed(index.0, index.1);
         let row_slice = self.matrix.simd_rows.row_as_flat_mut(row);
 
         &mut row_slice[x]
@@ -266,22 +259,22 @@ where
 
 /// Basic iterator struct to go over matrix
 #[derive(Clone, Debug)]
-pub struct SimdMatrixIter<'a, T: 'a, O: 'a>
+pub struct Matrix2DIter<'a, T: 'a, O: 'a>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    O: AccessStrategy,
 {
     /// Reference to the matrix we iterate over.
-    pub(crate) matrix: &'a Matrix2D<T, O>,
+    pub(crate) matrix: &'a MatrixD<T, O>,
 
     /// Current index of vector iteration.
     pub(crate) index: usize,
 }
 
-impl<'a, T, O> Iterator for SimdMatrixIter<'a, T, O>
+impl<'a, T, O> Iterator for Matrix2DIter<'a, T, O>
 where
     T: Simd + Default + Clone,
-    O: AlignmentStrategy,
+    O: AccessStrategy,
 {
     type Item = &'a [T];
 
@@ -299,22 +292,22 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{AlignColumn, AlignRow, Matrix2D};
+    use super::{Columns, Rows, MatrixD};
     use crate::*;
 
     #[test]
     fn allocation_size() {
-        let m_1_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 1);
-        let m_1_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 1);
+        let m_1_1_r = MatrixD::<f32x4, Rows>::with_dimension(1, 1);
+        let m_1_1_c = MatrixD::<f32x4, Columns>::with_dimension(1, 1);
 
-        let m_5_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 5);
-        let m_5_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 5);
+        let m_5_5_r = MatrixD::<f32x4, Rows>::with_dimension(5, 5);
+        let m_5_5_c = MatrixD::<f32x4, Columns>::with_dimension(5, 5);
 
-        let m_1_4_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 4);
-        let m_4_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(4, 1);
+        let m_1_4_r = MatrixD::<f32x4, Rows>::with_dimension(1, 4);
+        let m_4_1_c = MatrixD::<f32x4, Columns>::with_dimension(4, 1);
 
-        let m_4_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(4, 1);
-        let m_1_4_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 4);
+        let m_4_1_r = MatrixD::<f32x4, Rows>::with_dimension(4, 1);
+        let m_1_4_c = MatrixD::<f32x4, Columns>::with_dimension(1, 4);
 
         assert_eq!(m_1_1_r.simd_rows.data.len(), 1);
         assert_eq!(m_1_1_c.simd_rows.data.len(), 1);
@@ -330,10 +323,9 @@ mod test {
     }
 
     #[test]
-
     fn access() {
-        let mut m_5_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 5);
-        let mut m_5_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 5);
+        let mut m_5_5_r = MatrixD::<f32x4, Rows>::with_dimension(5, 5);
+        let mut m_5_5_c = MatrixD::<f32x4, Columns>::with_dimension(5, 5);
 
         assert_eq!(m_5_5_c.column(0).len(), 2);
         assert_eq!(m_5_5_c.column_mut(0).len(), 2);
@@ -368,12 +360,11 @@ mod test {
     }
 
     #[test]
-
     fn flattened() {
-        let mut m_1_5_r = Matrix2D::<f32x4, AlignRow>::with_dimension(1, 5);
-        let mut m_1_5_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(1, 5);
-        let mut m_5_1_c = Matrix2D::<f32x4, AlignColumn>::with_dimension(5, 1);
-        let mut m_5_1_r = Matrix2D::<f32x4, AlignRow>::with_dimension(5, 1);
+        let mut m_1_5_r = MatrixD::<f32x4, Rows>::with_dimension(1, 5);
+        let mut m_1_5_c = MatrixD::<f32x4, Columns>::with_dimension(1, 5);
+        let mut m_5_1_c = MatrixD::<f32x4, Columns>::with_dimension(5, 1);
+        let mut m_5_1_r = MatrixD::<f32x4, Rows>::with_dimension(5, 1);
 
         let mut m_1_5_r_flat = m_1_5_r.flat_mut();
         let mut m_1_5_c_flat = m_1_5_c.flat_mut();

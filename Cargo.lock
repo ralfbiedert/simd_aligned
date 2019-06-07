@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "simd_aligned"
-version = "0.1.5"
+version = "0.2.0"
 dependencies = [
  "criterion 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "packed_simd 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",

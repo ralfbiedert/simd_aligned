@@ -15,7 +15,7 @@ You want to use [std::simd](https://github.com/rust-lang-nursery/packed_simd/) b
 * supports everything from `u8x2` to `f64x8`
 * think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x16]`)
 * defines `u8s`, ..., `f36s` as "best guess" for current platform (WIP)
-* provides N-dimensional `SimdVector` and NxM-dimensional `SimdMatrix`.
+* provides `Vector` and 2-dimensional `MatrixD`.
 
 
 **Note**: Right now this is an experimental crate. Features might be added or removed depending on how [std::simd](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
@@ -32,8 +32,8 @@ use packed_simd::*;
 use simd_aligned::*;
 
 // Create vectors of `10` f64 elements with value `0.0`.
-let mut v1 = SimdVector::<f64s>::with(0.0, 10);
-let mut v2 = SimdVector::<f64s>::with(0.0, 10);
+let mut v1 = VectorD::<f64s>::with(0.0, 10);
+let mut v2 = VectorD::<f64s>::with(0.0, 10);
 
 // Get "flat", mutable view of the vector, and set individual elements:
 let v1_m = v1.flat_mut();
