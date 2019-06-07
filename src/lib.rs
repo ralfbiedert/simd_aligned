@@ -1,19 +1,19 @@
 //! # In One Sentence
 //!
-//! You want to use [std::simd](https://github.com/rust-lang-nursery/packed_simd/) but realized there is no simple, safe and fast way to align your `f32x8` (and friends) in memory _and_ treat them as regular `f32` slices for easy loading and manipulation; `simd_aligned` to the rescue.
+//! You want to use [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) but realized there is no simple, safe and fast way to align your `f32x8` (and friends) in memory _and_ treat them as regular `f32` slices for easy loading and manipulation; `simd_aligned` to the rescue.
 //!
 //!
 //!
 //! # Highlights
 //!
-//! * built on top of [std::simd](https://github.com/rust-lang-nursery/packed_simd/) for easy data handling
+//! * built on top of [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) for easy data handling
 //! * supports everything from `u8x2` to `f64x8`
 //! * think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x16]`)
 //! * defines `u8s`, ..., `f36s` as "best guess" for current platform (WIP)
-//! * provides N-dimensional [VectorD] and NxM-dimensional [MatrixD].
+//! * provides N-dimensional [`VectorD`] and NxM-dimensional [`MatrixD`].
 //!
 //!
-//! **Note**: Right now this is an experimental crate. Features might be added or removed depending on how [std::simd](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
+//! **Note**: Right now this is an experimental crate. Features might be added or removed depending on how [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) evolves. At the end of the day it's just about being able to load and manipulate data without much fuzz.
 //!
 //!
 //! # Examples
@@ -64,7 +64,7 @@
 //!
 //! # FAQ
 //!
-//! ### How does it relate to [faster](https://github.com/AdamNiederer/faster) and [std::simd](https://github.com/rust-lang-nursery/packed_simd/)?
+//! ### How does it relate to [faster](https://github.com/AdamNiederer/faster) and [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/)?
 //!
 //! * `simd_aligned` builds on top of `std::simd`. At aims to provide common, SIMD-aligned
 //! data structure that support simple and safe scalar access patterns.
@@ -78,6 +78,9 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
+
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::module_inception)]
 
 mod conversion;
 mod matrix;

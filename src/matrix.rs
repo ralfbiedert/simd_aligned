@@ -37,7 +37,7 @@ impl AccessStrategy for Columns {
 /// A dynamic (heap allocated) matrix with one axis aligned for fast and safe SIMD access that
 /// also provides a flat view on its data.
 ///
-/// You can use [MatrixD] when you need to deal with multiple SIMD vectors, but
+/// You can use [`MatrixD`] when you need to deal with multiple SIMD vectors, but
 /// want them arranged in a compact cache-friendly manner. Internally this struct is backed by a
 /// continuous vector of aligned vectors, and dynamically sliced according to row / column access.
 ///
@@ -78,21 +78,25 @@ where
     T: Simd + Default + Clone,
     O: AccessStrategy,
 {
+    
+    /// Creates a new [`MatrixD`] with the given dimension.
     #[inline]
     pub fn with_dimension(width: usize, height: usize) -> Self {
         let (x, y) = O::flat_to_packed(width, height);
 
-        MatrixD {
+        Self {
             simd_rows: PackedMxN::with(T::default(), x, y),
             phantom: PhantomData,
         }
     }
-
+    
+    /// Returns the size as (`rows`, `columns`).
     pub fn dimension(&self) -> (usize, usize) {
         O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length)
     }
 
 
+    /// Provides a flat, immutable view of the contained data.
     #[inline]
     pub fn flat(&self) -> MatrixFlat<'_, T, O> {
         MatrixFlat {
@@ -101,6 +105,7 @@ where
         }
     }
 
+    /// Provides a flat mutable view of the contained data.
     #[inline]
     pub fn flat_mut(&mut self) -> MatrixFlatMut<'_, T, O> {
         MatrixFlatMut {
@@ -123,7 +128,7 @@ impl<T> MatrixD<T, Rows>
     #[inline]
     pub fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> {
         Matrix2DIter {
-            matrix: &self,
+            matrix: self,
             index: 0,
         }
     }
@@ -163,7 +168,7 @@ impl<T> MatrixD<T, Columns>
     #[inline]
     pub fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> {
         Matrix2DIter {
-            matrix: &self,
+            matrix: self,
             index: 0,
         }
     }

@@ -20,13 +20,13 @@ where
     T: Simd + Default + Clone,
 {
     #[inline]
-    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> PackedMxN<T> {
+    pub(crate) fn with(default: T, rows: usize, row_length: usize) -> Self {
         let vectors_per_row = match (row_length / T::LANES, row_length % T::LANES) {
             (x, 0) => x,
             (x, _) => x + 1,
         };
         
-        PackedMxN {
+        Self {
             rows,
             row_length,
             vectors_per_row,

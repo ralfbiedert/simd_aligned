@@ -38,7 +38,7 @@ where
     /// Produce a [VectorD] with the given element `t` as default and a flat size of `size`.
     #[inline]
     pub fn with(t: T::Element, size: usize) -> Self {
-        VectorD {
+        Self {
             simd_rows: PackedMxN::with(T::splat(t), 1, size),
         }
     }
