@@ -2,8 +2,10 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 use crate::traits::Simd;
 
-use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-use super::packed::PackedMxN;
+use super::{
+    conversion::{simd_container_flat_slice, simd_container_flat_slice_mut},
+    packed::PackedMxN,
+};
 
 /// A dynamic (heap allocated) vector aligned for fast and safe SIMD access that also provides a
 /// flat view on its data.
@@ -45,15 +47,11 @@ where
 
     /// Get a flat view for this [VectorD].
     #[inline]
-    pub fn flat(&self) -> &[T::Element] {
-        simd_container_flat_slice(&self.simd_rows.data[..], self.simd_rows.row_length)
-    }
+    pub fn flat(&self) -> &[T::Element] { simd_container_flat_slice(&self.simd_rows.data[..], self.simd_rows.row_length) }
 
     /// Get a flat, mutable view for this [VectorD].
     #[inline]
-    pub fn flat_mut(&mut self) -> &mut [T::Element] {
-        simd_container_flat_slice_mut(&mut self.simd_rows.data[..], self.simd_rows.row_length)
-    }
+    pub fn flat_mut(&mut self) -> &mut [T::Element] { simd_container_flat_slice_mut(&mut self.simd_rows.data[..], self.simd_rows.row_length) }
 }
 
 impl<T> Index<usize> for VectorD<T>
@@ -63,9 +61,7 @@ where
     type Output = T;
 
     #[inline]
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.simd_rows.data[index]
-    }
+    fn index(&self, index: usize) -> &Self::Output { &self.simd_rows.data[index] }
 }
 
 impl<T> IndexMut<usize> for VectorD<T>
@@ -73,9 +69,7 @@ where
     T: Simd + Default + Clone,
 {
     #[inline]
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.simd_rows.data[index]
-    }
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output { &mut self.simd_rows.data[index] }
 }
 
 impl<T> Deref for VectorD<T>
@@ -84,18 +78,14 @@ where
 {
     type Target = [T];
 
-    fn deref(&self) -> &[T] {
-        &self.simd_rows.data[..]
-    }
+    fn deref(&self) -> &[T] { &self.simd_rows.data[..] }
 }
 
 impl<T> DerefMut for VectorD<T>
 where
     T: Simd + Default + Clone,
 {
-    fn deref_mut(&mut self) -> &mut [T] {
-        &mut self.simd_rows.data[..]
-    }
+    fn deref_mut(&mut self) -> &mut [T] { &mut self.simd_rows.data[..] }
 }
 
 /// Basic iterator struct to go over matrix
@@ -110,7 +100,6 @@ where
     /// Current index of vector iteration.
     pub(crate) index: usize,
 }
-
 
 #[cfg(test)]
 mod test {

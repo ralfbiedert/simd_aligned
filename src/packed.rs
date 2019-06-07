@@ -1,8 +1,9 @@
-use std::{ops::Range};
+use std::ops::Range;
 
-use super::traits::Simd;
-use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-
+use super::{
+    conversion::{simd_container_flat_slice, simd_container_flat_slice_mut},
+    traits::Simd,
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct PackedMxN<T>
@@ -25,7 +26,7 @@ where
             (x, 0) => x,
             (x, _) => x + 1,
         };
-        
+
         Self {
             rows,
             row_length,
@@ -36,16 +37,14 @@ where
 
     /// Computes an offset for a vector and attribute.
     #[inline]
-    pub(crate) fn row_start_offset(&self, row: usize) -> usize {
-        row * self.vectors_per_row
-    }
+    pub(crate) fn row_start_offset(&self, row: usize) -> usize { row * self.vectors_per_row }
 
     /// Returns the range of SIMD vectors for the given row.
     #[inline]
     pub(crate) fn range_for_row(&self, row: usize) -> Range<usize> {
         let start = self.row_start_offset(row);
         let end = start + self.vectors_per_row;
-        start..end
+        start .. end
     }
 
     #[inline]
@@ -66,7 +65,7 @@ where
 mod test {
     use super::PackedMxN;
     use crate::f32x4;
-    
+
     #[test]
     fn allocation_size() {
         let r_1 = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 1, 4);
@@ -88,14 +87,14 @@ mod test {
     fn range() {
         let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
 
-        assert_eq!(r.range_for_row(2), 8..12);
+        assert_eq!(r.range_for_row(2), 8 .. 12);
     }
 
     #[test]
     fn slice() {
         let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
-
         let s = r.row_as_flat(1);
+        
         assert_eq!(s.len(), 16);
     }
 

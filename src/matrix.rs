@@ -1,11 +1,14 @@
-use std::marker::PhantomData;
-use std::ops::{Index, IndexMut};
+use std::{
+    marker::PhantomData,
+    ops::{Index, IndexMut},
+};
 
 use crate::traits::Simd;
 
-use super::conversion::{simd_container_flat_slice, simd_container_flat_slice_mut};
-use super::packed::PackedMxN;
-
+use super::{
+    conversion::{simd_container_flat_slice, simd_container_flat_slice_mut},
+    packed::PackedMxN,
+};
 
 #[doc(hidden)]
 pub trait AccessStrategy {
@@ -22,16 +25,12 @@ pub struct Columns;
 
 impl AccessStrategy for Rows {
     #[inline]
-    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
-        (x, y)
-    }
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) { (x, y) }
 }
 
 impl AccessStrategy for Columns {
     #[inline]
-    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
-        (y, x)
-    }
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) { (y, x) }
 }
 
 /// A dynamic (heap allocated) matrix with one axis aligned for fast and safe SIMD access that
@@ -78,7 +77,6 @@ where
     T: Simd + Default + Clone,
     O: AccessStrategy,
 {
-    
     /// Creates a new [`MatrixD`] with the given dimension.
     #[inline]
     pub fn with_dimension(width: usize, height: usize) -> Self {
@@ -89,12 +87,9 @@ where
             phantom: PhantomData,
         }
     }
-    
-    /// Returns the size as (`rows`, `columns`).
-    pub fn dimension(&self) -> (usize, usize) {
-        O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length)
-    }
 
+    /// Returns the size as (`rows`, `columns`).
+    pub fn dimension(&self) -> (usize, usize) { O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length) }
 
     /// Provides a flat, immutable view of the contained data.
     #[inline]
@@ -116,85 +111,70 @@ where
 }
 
 impl<T> MatrixD<T, Rows>
-    where
-        T: Simd + Default + Clone,
+where
+    T: Simd + Default + Clone,
 {
     #[inline]
     pub fn row(&self, i: usize) -> &[T] {
         let range = self.simd_rows.range_for_row(i);
         &self.simd_rows.data[range]
     }
-    
+
     #[inline]
-    pub fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> {
-        Matrix2DIter {
-            matrix: self,
-            index: 0,
-        }
-    }
-    
+    pub fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> { Matrix2DIter { matrix: self, index: 0 } }
+
     #[inline]
     pub fn row_mut(&mut self, i: usize) -> &mut [T] {
         let range = self.simd_rows.range_for_row(i);
         &mut self.simd_rows.data[range]
     }
-    
+
     #[inline]
     pub fn row_as_flat(&self, i: usize) -> &[T::Element] {
         let row = self.row(i);
         simd_container_flat_slice(row, self.simd_rows.row_length)
     }
-    
+
     #[inline]
     pub fn row_as_flat_mut(&mut self, i: usize) -> &mut [T::Element] {
         let length = self.simd_rows.row_length;
         let row = self.row_mut(i);
         simd_container_flat_slice_mut(row, length)
     }
-
 }
 
 impl<T> MatrixD<T, Columns>
-    where
-        T: Simd + Default + Clone,
+where
+    T: Simd + Default + Clone,
 {
-    
     #[inline]
     pub fn column(&self, i: usize) -> &[T] {
         let range = self.simd_rows.range_for_row(i);
         &self.simd_rows.data[range]
     }
-    
+
     #[inline]
-    pub fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> {
-        Matrix2DIter {
-            matrix: self,
-            index: 0,
-        }
-    }
-    
+    pub fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> { Matrix2DIter { matrix: self, index: 0 } }
+
     #[inline]
     pub fn column_mut(&mut self, i: usize) -> &mut [T] {
         let range = self.simd_rows.range_for_row(i);
         &mut self.simd_rows.data[range]
     }
-    
+
     #[inline]
     pub fn column_as_flat(&self, i: usize) -> &[T::Element] {
         let column = self.column(i);
         simd_container_flat_slice(column, self.simd_rows.row_length)
     }
-    
+
     #[inline]
     pub fn column_as_flat_mut(&mut self, i: usize) -> &mut [T::Element] {
         let length = self.simd_rows.row_length;
         let column = self.column_mut(i);
         simd_container_flat_slice_mut(column, length)
     }
-    
 }
-
-
 
 /// Produced by [`MatrixD::flat`], this allow for flat matrix access.
 pub struct MatrixFlat<'a, T: 'a, A: 'a>
@@ -297,7 +277,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{Columns, Rows, MatrixD};
+    use super::{Columns, MatrixD, Rows};
     use crate::*;
 
     #[test]

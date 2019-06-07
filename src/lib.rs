@@ -78,7 +78,6 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
-
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::module_inception)]
 
@@ -92,20 +91,21 @@ pub mod traits;
 
 use packed_simd::*;
 
-pub use crate::conversion::{packed_as_flat, packed_as_flat_mut};
-pub use crate::matrix::{Columns, AccessStrategy, Rows, MatrixD, MatrixFlat, MatrixFlatMut};
-pub use crate::vector::VectorD;
+pub use crate::{
+    conversion::{packed_as_flat, packed_as_flat_mut},
+    matrix::{AccessStrategy, Columns, MatrixD, MatrixFlat, MatrixFlatMut, Rows},
+    vector::VectorD,
+};
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
         impl crate::traits::Simd for $simd {
             type Element = $element;
-            const LANES: usize = $lanes;
             type LanesType = $lanestype;
 
-            fn splat(t: Self::Element) -> Self {
-                Self::splat(t)
-            }
+            const LANES: usize = $lanes;
+
+            fn splat(t: Self::Element) -> Self { Self::splat(t) }
         }
     };
 }

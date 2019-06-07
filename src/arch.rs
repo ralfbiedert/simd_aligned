@@ -51,7 +51,7 @@ pub mod x128 {
         super::super::i64x2,
         super::super::f32x4,
         super::super::f64x2
-     );
+    );
 }
 
 /// Vectors with fixed length of 256 bits.
@@ -67,7 +67,7 @@ pub mod x256 {
         super::super::i64x4,
         super::super::f32x8,
         super::super::f64x4
-     );
+    );
 }
 
 /// Vectors with fixed length of 512 bits.
@@ -83,14 +83,14 @@ pub mod x512 {
         super::super::i64x8,
         super::super::f32x16,
         super::super::f64x8
-     );
+    );
 }
 
 //     // TODO: Implement heuristics for architecture / target features.
 
 /// Vectors for the current architecture.
 pub mod current {
-    
+
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     mod current {
         //! Vectors for the current arch.
@@ -107,7 +107,7 @@ pub mod current {
             super::super::f64x4
         );
     }
-    
+
     #[cfg(any(target_arch = "aarch64"))]
     mod current {
         impl_vecs!(
@@ -123,12 +123,8 @@ pub mod current {
             super::super::f64x2
         );
     }
-    
-    #[cfg(not(any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "aarch64"
-    )))]
+
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
     mod current {
         impl_vecs!(
             super::super::u8x16,
@@ -143,7 +139,6 @@ pub mod current {
             super::super::f64x2
         );
     }
-    
+
     pub use current::*;
 }
-
