@@ -92,6 +92,7 @@ pub mod traits;
 use packed_simd::*;
 
 pub use crate::{
+    arch::current::*,
     conversion::{packed_as_flat, packed_as_flat_mut},
     matrix::{AccessStrategy, Columns, MatrixD, MatrixFlat, MatrixFlatMut, Rows},
     vector::VectorD,
