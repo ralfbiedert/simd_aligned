@@ -101,6 +101,13 @@ pub use crate::{
 
 pub use std::simd::*;
 
+
+pub trait SimdExt {
+    type T;
+
+    fn sum(&self) -> Self::T;
+}
+
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
         impl crate::traits::Simd for $simd {
@@ -110,6 +117,14 @@ macro_rules! impl_simd {
             const LANES: usize = $lanes;
 
             fn splat(t: Self::Element) -> Self { Self::splat(t) }
+        }
+
+        impl SimdExt for $simd {
+            type T = $element;
+
+            fn sum(&self) -> Self::T {
+                self.as_array().iter().sum()
+            }
         }
     };
 }
