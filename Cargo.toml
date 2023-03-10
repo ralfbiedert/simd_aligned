@@ -14,10 +14,3 @@ edition = "2018"
 travis-ci = { repository = "ralfbiedert/simd_aligned_rust" }
 maintenance = { status = "experimental" }
 
-
-[dev-dependencies]
-criterion = "0.2"
-
-[[bench]]
-name = "benchmarks"
-harness = false

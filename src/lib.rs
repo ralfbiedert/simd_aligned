@@ -1,7 +1,9 @@
+//!
+//! NOTE - Do not use this crate for now. It has been reactivated to make FFSVM compile again, but needs some architectural work.
+//!
 //! # In One Sentence
 //!
 //! You want to use [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) but realized there is no simple, safe and fast way to align your `f32x8` (and friends) in memory _and_ treat them as regular `f32` slices for easy loading and manipulation; `simd_aligned` to the rescue.
-//!
 //!
 //!
 //! # Highlights

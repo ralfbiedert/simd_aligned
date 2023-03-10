@@ -89,18 +89,6 @@ where
     fn deref_mut(&mut self) -> &mut [T] { &mut self.simd_rows.data[..] }
 }
 
-/// Basic iterator struct to go over matrix
-#[derive(Clone, Debug)]
-pub struct VectorDIter<'a, T: 'a>
-where
-    T: Simd + Default + Clone,
-{
-    /// Reference to the matrix we iterate over.
-    pub(crate) vector: &'a VectorD<T>,
-
-    /// Current index of vector iteration.
-    pub(crate) index: usize,
-}
 
 #[cfg(test)]
 mod test {
