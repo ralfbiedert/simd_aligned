@@ -2,7 +2,6 @@
 //!
 #![allow(non_camel_case_types)]
 
-use packed_simd::*;
 
 macro_rules! impl_vecs {
     ($u8s:ty, $i8s:ty, $u16s:ty, $i16s:ty, $u32s:ty, $i32s:ty, $u64s:ty, $i64s:ty, $f32s:ty, $f64s:ty) => {
@@ -41,48 +40,48 @@ macro_rules! impl_vecs {
 /// Vectors with fixed length of 128 bits.
 pub mod x128 {
     impl_vecs!(
-        super::super::u8x16,
-        super::super::i8x16,
-        super::super::u16x8,
-        super::super::i16x8,
-        super::super::u32x4,
-        super::super::i32x4,
-        super::super::u64x2,
-        super::super::i64x2,
-        super::super::f32x4,
-        super::super::f64x2
+        crate::u8x16,
+        crate::i8x16,
+        crate::u16x8,
+        crate::i16x8,
+        crate::u32x4,
+        crate::i32x4,
+        crate::u64x2,
+        crate::i64x2,
+        crate::f32x4,
+        crate::f64x2
     );
 }
 
 /// Vectors with fixed length of 256 bits.
 pub mod x256 {
     impl_vecs!(
-        super::super::u8x32,
-        super::super::i8x32,
-        super::super::u16x16,
-        super::super::i16x16,
-        super::super::u32x8,
-        super::super::i32x8,
-        super::super::u64x4,
-        super::super::i64x4,
-        super::super::f32x8,
-        super::super::f64x4
+        crate::u8x32,
+        crate::i8x32,
+        crate::u16x16,
+        crate::i16x16,
+        crate::u32x8,
+        crate::i32x8,
+        crate::u64x4,
+        crate::i64x4,
+        crate::f32x8,
+        crate::f64x4
     );
 }
 
 /// Vectors with fixed length of 512 bits.
 pub mod x512 {
     impl_vecs!(
-        super::super::u8x64,
-        super::super::i8x64,
-        super::super::u16x32,
-        super::super::i16x32,
-        super::super::u32x16,
-        super::super::i32x16,
-        super::super::u64x8,
-        super::super::i64x8,
-        super::super::f32x16,
-        super::super::f64x8
+        crate::u8x64,
+        crate::i8x64,
+        crate::u16x32,
+        crate::i16x32,
+        crate::u32x16,
+        crate::i32x16,
+        crate::u64x8,
+        crate::i64x8,
+        crate::f32x16,
+        crate::f64x8
     );
 }
 
@@ -95,16 +94,16 @@ pub mod current {
     mod current {
         //! Vectors for the current arch.
         impl_vecs!(
-            super::super::u8x32,
-            super::super::i8x32,
-            super::super::u16x16,
-            super::super::i16x16,
-            super::super::u32x8,
-            super::super::i32x8,
-            super::super::u64x4,
-            super::super::i64x4,
-            super::super::f32x8,
-            super::super::f64x4
+            crate::u8x32,
+            crate::i8x32,
+            crate::u16x16,
+            crate::i16x16,
+            crate::u32x8,
+            crate::i32x8,
+            crate::u64x4,
+            crate::i64x4,
+            crate::f32x8,
+            crate::f64x4
         );
     }
 

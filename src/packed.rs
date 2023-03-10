@@ -63,8 +63,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use std::simd::f32x4;
     use super::PackedMxN;
-    use crate::f32x4;
 
     #[test]
     fn allocation_size() {
@@ -94,7 +94,7 @@ mod test {
     fn slice() {
         let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
         let s = r.row_as_flat(1);
-        
+
         assert_eq!(s.len(), 16);
     }
 

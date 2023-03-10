@@ -23,7 +23,8 @@
 //! All elements are guaranteed to be properly aligned for fast access.
 //!
 //! ```rust
-//! use packed_simd::*;
+//! #![feature(portable_simd)]
+//! use std::simd::*;
 //! use simd_aligned::*;
 //!
 //! // Create vectors of `10` f64 elements with value `0.0`.
@@ -74,6 +75,7 @@
 //! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
 //! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
+#![feature(portable_simd)]
 #![warn(clippy::all)] // Enable ALL the warnings ...
 #![warn(clippy::nursery)]
 #![warn(clippy::pedantic)]
@@ -89,7 +91,6 @@ mod vector;
 pub mod arch;
 pub mod traits;
 
-use packed_simd::*;
 
 pub use crate::{
     arch::current::*,
@@ -97,6 +98,8 @@ pub use crate::{
     matrix::{AccessStrategy, Columns, MatrixD, MatrixFlat, MatrixFlatMut, Rows},
     vector::VectorD,
 };
+
+pub use std::simd::*;
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
@@ -110,13 +113,12 @@ macro_rules! impl_simd {
         }
     };
 }
-impl_simd!(u8x2, u8, 2, [u8; 2]);
+
 impl_simd!(u8x4, u8, 4, [u8; 4]);
 impl_simd!(u8x8, u8, 8, [u8; 8]);
 impl_simd!(u8x16, u8, 16, [u8; 16]);
 impl_simd!(u8x32, u8, 32, [u8; 32]);
 
-impl_simd!(i8x2, i8, 2, [i8; 2]);
 impl_simd!(i8x4, i8, 4, [i8; 4]);
 impl_simd!(i8x8, i8, 8, [i8; 8]);
 impl_simd!(i8x16, i8, 16, [i8; 16]);

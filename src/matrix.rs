@@ -43,7 +43,8 @@ impl AccessStrategy for Columns {
 /// # Example
 ///
 /// ```rust
-/// use packed_simd::*;
+/// #![feature(portable_simd)]
+/// use std::simd::*;
 /// use simd_aligned::*;
 ///
 /// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.

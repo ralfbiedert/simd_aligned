@@ -13,7 +13,8 @@ use super::{
 /// # Example
 ///
 /// ```rust
-/// use packed_simd::*;
+/// #![feature(portable_simd)]
+/// use std::simd::*;
 /// use simd_aligned::*;
 ///
 /// // Create a vector of f64x__ elements that, in total, will hold space
@@ -103,8 +104,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use std::simd::f32x4;
     use super::VectorD;
-    use crate::f32x4;
 
     #[test]
     fn allocation_size() {
