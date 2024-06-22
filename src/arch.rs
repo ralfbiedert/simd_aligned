@@ -110,32 +110,32 @@ pub mod current {
     #[cfg(any(target_arch = "aarch64"))]
     mod current {
         impl_vecs!(
-            super::super::u8x16,
-            super::super::i8x16,
-            super::super::u16x8,
-            super::super::i16x8,
-            super::super::u32x4,
-            super::super::i32x4,
-            super::super::u64x2,
-            super::super::i64x2,
-            super::super::f32x4,
-            super::super::f64x2
+            crate::u8x16,
+            crate::i8x16,
+            crate::u16x8,
+            crate::i16x8,
+            crate::u32x4,
+            crate::i32x4,
+            crate::u64x2,
+            crate::i64x2,
+            crate::f32x4,
+            crate::f64x2
         );
     }
 
     #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
     mod current {
         impl_vecs!(
-            super::super::u8x16,
-            super::super::i8x16,
-            super::super::u16x8,
-            super::super::i16x8,
-            super::super::u32x4,
-            super::super::i32x4,
-            super::super::u64x2,
-            super::super::i64x2,
-            super::super::f32x4,
-            super::super::f64x2
+            crate::u8x16,
+            crate::i8x16,
+            crate::u16x8,
+            crate::i16x8,
+            crate::u32x4,
+            crate::i32x4,
+            crate::u64x2,
+            crate::i64x2,
+            crate::f32x4,
+            crate::f64x2
         );
     }
 
