@@ -14,7 +14,7 @@
 //! * built on top of [`wide`](https://crates.io/crates/wide/) for easy data handling
 //! * supports everything from `u8x16` to `f64x4`
 //! * think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x4]`)
-//! * provides N-dimensional [`VecD`] and NxM-dimensional [`MatD`].
+//! * provides N-dimensional [`VecSimd`](https://docs.rs/simd_aligned/latest/simd_aligned/struct.VecSimd.html) and NxM-dimensional [`MatSimd`](https://docs.rs/simd_aligned/latest/simd_aligned/struct.MatSimd.html).
 //!
 //! # Examples
 //!
@@ -24,8 +24,8 @@
 //! use simd_aligned::*;
 //!
 //! // Create vectors of `10` f64 elements with value `0.0`.
-//! let mut v1 = VecD::<f64x4>::with(0.0, 10);
-//! let mut v2 = VecD::<f64x4>::with(0.0, 10);
+//! let mut v1 = VecSimd::<f64x4>::with(0.0, 10);
+//! let mut v2 = VecSimd::<f64x4>::with(0.0, 10);
 //!
 //! // Get "flat", mutable view of the vector, and set individual elements:
 //! let v1_m = v1.flat_mut();
@@ -87,17 +87,16 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::module_inception)]
 
-mod arch;
 mod conversion;
 mod mat;
 mod packed;
 mod vec;
 
+pub mod arch;
 pub mod traits;
 
 pub use crate::{
-    arch::*,
     conversion::{packed_as_flat, packed_as_flat_mut},
-    mat::{AccessStrategy, Columns, MatD, MatrixFlat, MatrixFlatMut, Rows},
-    vec::VecD,
+    mat::{AccessStrategy, Columns, MatFlat, MatFlatMut, MatSimd, Rows},
+    vec::VecSimd,
 };

@@ -1,26 +1,7 @@
-//! Contains vector definitions with a fixed bit width.
-//!
+//! Contains vector definitions with a fixed bit width, reexported from [wide](https://crates.io/crates/wide)
 #![allow(non_camel_case_types)]
 
-pub use wide::f32x4;
-pub use wide::f32x8;
-pub use wide::f64x2;
-pub use wide::f64x4;
-pub use wide::i16x16;
-pub use wide::i16x8;
-pub use wide::i32x4;
-pub use wide::i32x8;
-pub use wide::i64x2;
-pub use wide::i64x4;
-pub use wide::i8x16;
-pub use wide::i8x32;
-pub use wide::u16x16;
-pub use wide::u16x8;
-pub use wide::u32x4;
-pub use wide::u32x8;
-pub use wide::u64x2;
-pub use wide::u64x4;
-pub use wide::u8x16;
+pub use wide::{f32x4, f32x8, f64x2, f64x4, i16x16, i16x8, i32x4, i32x8, i64x2, i64x4, i8x16, i8x32, u16x16, u16x8, u32x4, u32x8, u64x2, u64x4, u8x16};
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
