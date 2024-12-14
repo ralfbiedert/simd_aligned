@@ -66,7 +66,7 @@ where
 #[cfg(test)]
 mod test {
     use super::PackedMxN;
-    use crate::f32x4;
+    use crate::arch::f32x4;
 
     #[test]
     fn allocation_size() {

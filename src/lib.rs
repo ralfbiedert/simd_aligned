@@ -21,7 +21,7 @@
 //! Produces a vector that can hold `10` elements of type `f64`. All elements are guaranteed to be properly aligned for fast access.
 //!
 //! ```rust
-//! use simd_aligned::*;
+//! use simd_aligned::{VecSimd, arch::f64x4};
 //!
 //! // Create vectors of `10` f64 elements with value `0.0`.
 //! let mut v1 = VecSimd::<f64x4>::with(0.0, 10);

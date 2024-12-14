@@ -32,7 +32,7 @@ where
 ///
 /// # Example
 /// ```rust
-/// use simd_aligned::*;
+/// use simd_aligned::{packed_as_flat, arch::f32x4};
 ///
 /// let packed = [f32x4::splat(0_f32); 4];
 ///
@@ -51,7 +51,7 @@ where
 /// Converts a mutable slice of SIMD vectors into a flat slice of elements.
 /// # Example
 /// ```rust
-/// use simd_aligned::*;
+/// use simd_aligned::{packed_as_flat_mut, arch::f32x4};
 ///
 /// let mut packed = [f32x4::splat(0_f32); 4];
 ///
@@ -70,7 +70,7 @@ where
 #[cfg(test)]
 mod test {
     use super::{packed_as_flat, packed_as_flat_mut};
-    use crate::f32x4;
+    use crate::arch::f32x4;
 
     #[test]
     fn slice_flattening() {

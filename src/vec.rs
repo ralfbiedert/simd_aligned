@@ -13,11 +13,12 @@ use super::{
 /// # Example
 ///
 /// ```rust
-/// use simd_aligned::*;
 ///
 /// // Create a vector of f64x__ elements that, in total, will hold space
 /// // for at least 4 f64 values. Internally this might be one f64x4, two f64x2,
 /// // or one f64x8 where the 2nd half is hidden, depending on the current architecture.
+/// use simd_aligned::{VecSimd, arch::f64x4};
+///
 /// let mut v = VecSimd::<f64x4>::with(0_f64, 4);
 ///
 /// // Get a 'flat view' (&[f64]) into the SIMD vectors and fill it.
@@ -103,7 +104,7 @@ where
 #[cfg(test)]
 mod test {
     use super::VecSimd;
-    use crate::f32x4;
+    use crate::arch::f32x4;
 
     #[test]
     fn allocation_size() {

@@ -47,7 +47,7 @@ impl AccessStrategy for Columns {
 /// # Example
 ///
 /// ```rust
-/// use simd_aligned::*;
+/// use simd_aligned::{MatSimd, arch::f32x4, Rows};
 ///
 /// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.
 /// let mut m = MatSimd::<f32x4, Rows>::with_dimension(10, 5);
@@ -298,7 +298,7 @@ where
 #[cfg(test)]
 mod test {
     use super::{Columns, MatSimd, Rows};
-    use crate::*;
+    use crate::arch::f32x4;
 
     #[test]
     fn allocation_size() {
