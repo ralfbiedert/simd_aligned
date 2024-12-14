@@ -1,7 +1,3 @@
-#
-# Publish all crates.
-#
-
 PROJECT_ROOT="$( cd "$(dirname "$0")/.." ; pwd -P )" # this file
 
 function update_readme() {

@@ -1,5 +1,8 @@
-//! [![Rust](https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml/badge.svg)](https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml)
-//! [Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)
+//! [![crates.io-badge]][crates.io-url]
+//! [![docs.rs-badge]][docs.rs-url]
+//! ![license-badge]
+//! [![rust-version-badge]][rust-version-url]
+//! [![rust-build-badge]][rust-build-url]
 //!
 //! # In One Sentence
 //!
@@ -67,7 +70,16 @@
 //!   and want to operate them "full SIMD ahead". However, in particular when dealing with multiple
 //!   slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
 //!   become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
-
+//!
+//! [crates.io-badge]: https://img.shields.io/crates/v/simd_aligned.svg
+//! [crates.io-url]: https://crates.io/crates/simd_aligned
+//! [license-badge]: https://img.shields.io/badge/license-BSD2-blue.svg
+//! [docs.rs-badge]: https://docs.rs/simd_aligned/badge.svg
+//! [docs.rs-url]: https://docs.rs/simd_aligned/
+//! [rust-version-badge]: https://img.shields.io/badge/rust-1.83%2B-blue.svg?maxAge=3600
+//! [rust-version-url]: https://github.com/ralfbiedert/simd_aligned
+//! [rust-build-badge]: https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml/badge.svg
+//! [rust-build-url]: https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml
 #![warn(clippy::all)] // Enable ALL the warnings ...
 #![warn(clippy::nursery)]
 #![warn(clippy::pedantic)]
