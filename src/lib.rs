@@ -79,7 +79,7 @@
 //!
 //! [crates.io-badge]: https://img.shields.io/crates/v/simd_aligned.svg
 //! [crates.io-url]: https://crates.io/crates/simd_aligned
-//! [license-badge]: https://img.shields.io/badge/license-BSD2-blue.svg
+//! [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 //! [docs.rs-badge]: https://docs.rs/simd_aligned/badge.svg
 //! [docs.rs-url]: https://docs.rs/simd_aligned/
 //! [rust-version-badge]: https://img.shields.io/badge/rust-1.83%2B-blue.svg?maxAge=3600
