@@ -59,6 +59,12 @@
 //! test vectors::simd_aligned ... bench:          71 ns/iter (+/- 5)
 //! ```
 //!
+//! # Status
+//!
+//! - December 2024: Compiles on stable.
+//! - March 2023: Compiles again on latest Rust nightly.
+//! - August 2018: Initial version.
+//!
 //! # FAQ
 //!
 //! ### How does it relate to [faster](https://github.com/AdamNiederer/faster) and [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/)?

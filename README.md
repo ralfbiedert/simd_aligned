@@ -14,7 +14,7 @@ You want to use safe SIMD datatypes from [`wide`](https://crates.io/crates/wide/
 * built on top of [`wide`](https://crates.io/crates/wide/) for easy data handling
 * supports everything from `u8x16` to `f64x4`
 * think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x4]`)
-* provides N-dimensional [`VecD`] and NxM-dimensional [`MatD`].
+* provides N-dimensional [`VecSimd`](https://docs.rs/simd_aligned/latest/simd_aligned/struct.VecSimd.html) and NxM-dimensional [`MatSimd`](https://docs.rs/simd_aligned/latest/simd_aligned/struct.MatSimd.html).
 
 ## Examples
 
@@ -24,8 +24,8 @@ Produces a vector that can hold `10` elements of type `f64`. All elements are gu
 use simd_aligned::*;
 
 // Create vectors of `10` f64 elements with value `0.0`.
-let mut v1 = VecD::<f64x4>::with(0.0, 10);
-let mut v2 = VecD::<f64x4>::with(0.0, 10);
+let mut v1 = VecSimd::<f64x4>::with(0.0, 10);
+let mut v2 = VecSimd::<f64x4>::with(0.0, 10);
 
 // Get "flat", mutable view of the vector, and set individual elements:
 let v1_m = v1.flat_mut();
@@ -58,6 +58,12 @@ test vectors::packed       ... bench:          77 ns/iter (+/- 4)
 test vectors::scalar       ... bench:       1,177 ns/iter (+/- 464)
 test vectors::simd_aligned ... bench:          71 ns/iter (+/- 5)
 ```
+
+## Status
+
+- December 2024: Compiles on stable.
+- March 2023: Compiles again on latest Rust nightly.
+- August 2018: Initial version.
 
 ## FAQ
 
