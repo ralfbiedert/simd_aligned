@@ -32,7 +32,6 @@ where
 ///
 /// # Example
 /// ```rust
-/// #![feature(portable_simd)]
 /// use simd_aligned::*;
 ///
 /// let packed = [f32x4::splat(0_f32); 4];
@@ -52,7 +51,6 @@ where
 /// Converts a mutable slice of SIMD vectors into a flat slice of elements.
 /// # Example
 /// ```rust
-/// #![feature(portable_simd)]
 /// use simd_aligned::*;
 ///
 /// let mut packed = [f32x4::splat(0_f32); 4];

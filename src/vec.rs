@@ -13,7 +13,6 @@ use super::{
 /// # Example
 ///
 /// ```rust
-/// #![feature(portable_simd)]
 /// use simd_aligned::*;
 ///
 /// // Create a vector of f64x__ elements that, in total, will hold space
