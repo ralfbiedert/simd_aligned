@@ -1,5 +1,5 @@
-//!
-//! NOTE - Do not use this crate for now. It has been reactivated to make FFSVM compile again, but needs some architectural work.
+//! [![Rust](https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml/badge.svg)](https://github.com/ralfbiedert/simd_aligned/actions/workflows/rust.yml)
+//! [Maintenance](https://img.shields.io/badge/maintenance-experimental-blue.svg)
 //!
 //! # In One Sentence
 //!
