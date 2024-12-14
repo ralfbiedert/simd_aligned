@@ -36,7 +36,7 @@ impl AccessStrategy for Columns {
 /// A dynamic (heap allocated) matrix with one axis aligned for fast and safe SIMD access that
 /// also provides a flat view on its data.
 ///
-/// You can use [`MatrixD`] when you need to deal with multiple SIMD vectors, but
+/// You can use [`MatD`] when you need to deal with multiple SIMD vectors, but
 /// want them arranged in a compact cache-friendly manner. Internally this struct is backed by a
 /// continuous vector of aligned vectors, and dynamically sliced according to row / column access.
 ///
@@ -44,11 +44,10 @@ impl AccessStrategy for Columns {
 ///
 /// ```rust
 /// #![feature(portable_simd)]
-/// use std::simd::*;
 /// use simd_aligned::*;
 ///
 /// // Create a matrix of height 10x`f32` and width 5x`f32`, optimized for row access.
-/// let mut m = MatrixD::<f32s, Rows>::with_dimension(10, 5);
+/// let mut m = MatD::<f32x4, Rows>::with_dimension(10, 5);
 ///
 /// // A `RowOptimized` matrix provides `row` access. In this example, you could query
 /// // rows `0` to `9` and receive vectors that can hold a total of at least `5` elements.
@@ -64,7 +63,7 @@ impl AccessStrategy for Columns {
 /// m_flat[(2, 4)] = 42_f32;
 /// ```
 #[derive(Clone, Debug)]
-pub struct MatrixD<T, A>
+pub struct MatD<T, A>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
@@ -73,12 +72,12 @@ where
     phantom: PhantomData<A>,
 }
 
-impl<T, O> MatrixD<T, O>
+impl<T, O> MatD<T, O>
 where
     T: Simd + Default + Clone,
     O: AccessStrategy,
 {
-    /// Creates a new [`MatrixD`] with the given dimension.
+    /// Creates a new [`MatD`] with the given dimension.
     #[inline]
     pub fn with_dimension(width: usize, height: usize) -> Self {
         let (x, y) = O::flat_to_packed(width, height);
@@ -111,7 +110,7 @@ where
     }
 }
 
-impl<T> MatrixD<T, Rows>
+impl<T> MatD<T, Rows>
 where
     T: Simd + Default + Clone,
 {
@@ -144,7 +143,7 @@ where
     }
 }
 
-impl<T> MatrixD<T, Columns>
+impl<T> MatD<T, Columns>
 where
     T: Simd + Default + Clone,
 {
@@ -177,23 +176,23 @@ where
     }
 }
 
-/// Produced by [`MatrixD::flat`], this allow for flat matrix access.
+/// Produced by [`MatD::flat`], this allow for flat matrix access.
 pub struct MatrixFlat<'a, T: 'a, A: 'a>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
 {
-    matrix: &'a MatrixD<T, A>,
+    matrix: &'a MatD<T, A>,
     phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
-/// Provided by [`MatrixD::flat_mut`], this allow for flat, mutable matrix access.
+/// Provided by [`MatD::flat_mut`], this allow for flat, mutable matrix access.
 pub struct MatrixFlatMut<'a, T: 'a, A: 'a>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
 {
-    matrix: &'a mut MatrixD<T, A>,
+    matrix: &'a mut MatD<T, A>,
     phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
@@ -251,7 +250,7 @@ where
     O: AccessStrategy,
 {
     /// Reference to the matrix we iterate over.
-    pub(crate) matrix: &'a MatrixD<T, O>,
+    pub(crate) matrix: &'a MatD<T, O>,
 
     /// Current index of vector iteration.
     pub(crate) index: usize,
@@ -278,22 +277,22 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{Columns, MatrixD, Rows};
+    use super::{Columns, MatD, Rows};
     use crate::*;
 
     #[test]
     fn allocation_size() {
-        let m_1_1_r = MatrixD::<f32x4, Rows>::with_dimension(1, 1);
-        let m_1_1_c = MatrixD::<f32x4, Columns>::with_dimension(1, 1);
+        let m_1_1_r = MatD::<f32x4, Rows>::with_dimension(1, 1);
+        let m_1_1_c = MatD::<f32x4, Columns>::with_dimension(1, 1);
 
-        let m_5_5_r = MatrixD::<f32x4, Rows>::with_dimension(5, 5);
-        let m_5_5_c = MatrixD::<f32x4, Columns>::with_dimension(5, 5);
+        let m_5_5_r = MatD::<f32x4, Rows>::with_dimension(5, 5);
+        let m_5_5_c = MatD::<f32x4, Columns>::with_dimension(5, 5);
 
-        let m_1_4_r = MatrixD::<f32x4, Rows>::with_dimension(1, 4);
-        let m_4_1_c = MatrixD::<f32x4, Columns>::with_dimension(4, 1);
+        let m_1_4_r = MatD::<f32x4, Rows>::with_dimension(1, 4);
+        let m_4_1_c = MatD::<f32x4, Columns>::with_dimension(4, 1);
 
-        let m_4_1_r = MatrixD::<f32x4, Rows>::with_dimension(4, 1);
-        let m_1_4_c = MatrixD::<f32x4, Columns>::with_dimension(1, 4);
+        let m_4_1_r = MatD::<f32x4, Rows>::with_dimension(4, 1);
+        let m_1_4_c = MatD::<f32x4, Columns>::with_dimension(1, 4);
 
         assert_eq!(m_1_1_r.simd_rows.data.len(), 1);
         assert_eq!(m_1_1_c.simd_rows.data.len(), 1);
@@ -310,8 +309,8 @@ mod test {
 
     #[test]
     fn access() {
-        let mut m_5_5_r = MatrixD::<f32x4, Rows>::with_dimension(5, 5);
-        let mut m_5_5_c = MatrixD::<f32x4, Columns>::with_dimension(5, 5);
+        let mut m_5_5_r = MatD::<f32x4, Rows>::with_dimension(5, 5);
+        let mut m_5_5_c = MatD::<f32x4, Columns>::with_dimension(5, 5);
 
         assert_eq!(m_5_5_c.column(0).len(), 2);
         assert_eq!(m_5_5_c.column_mut(0).len(), 2);
@@ -347,10 +346,10 @@ mod test {
 
     #[test]
     fn flattened() {
-        let mut m_1_5_r = MatrixD::<f32x4, Rows>::with_dimension(1, 5);
-        let mut m_1_5_c = MatrixD::<f32x4, Columns>::with_dimension(1, 5);
-        let mut m_5_1_c = MatrixD::<f32x4, Columns>::with_dimension(5, 1);
-        let mut m_5_1_r = MatrixD::<f32x4, Rows>::with_dimension(5, 1);
+        let mut m_1_5_r = MatD::<f32x4, Rows>::with_dimension(1, 5);
+        let mut m_1_5_c = MatD::<f32x4, Columns>::with_dimension(1, 5);
+        let mut m_5_1_c = MatD::<f32x4, Columns>::with_dimension(5, 1);
+        let mut m_5_1_r = MatD::<f32x4, Rows>::with_dimension(5, 1);
 
         let mut m_1_5_r_flat = m_1_5_r.flat_mut();
         let mut m_1_5_c_flat = m_1_5_c.flat_mut();

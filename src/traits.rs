@@ -12,4 +12,9 @@ pub trait Simd {
 
     /// Added for convenience
     fn splat(t: Self::Element) -> Self;
+
+    /// Added for convenience
+    fn as_array(&self) -> &[Self::Element];
+
+    fn sum(&self) -> Self::Element;
 }

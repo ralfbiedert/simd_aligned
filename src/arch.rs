@@ -2,142 +2,75 @@
 //!
 #![allow(non_camel_case_types)]
 
+pub use wide::u8x16;
+pub use wide::i8x16;
+pub use wide::i8x32;
+pub use wide::u16x8;
+pub use wide::u16x16;
+pub use wide::i16x8;
+pub use wide::i16x16;
+pub use wide::u32x4;
+pub use wide::u32x8;
+pub use wide::i32x4;
+pub use wide::i32x8;
+pub use wide::u64x2;
+pub use wide::u64x4;
+pub use wide::i64x2;
+pub use wide::i64x4;
+pub use wide::f32x8;
+pub use wide::f32x4;
+pub use wide::f64x2;
+pub use wide::f64x4;
 
-macro_rules! impl_vecs {
-    ($u8s:ty, $i8s:ty, $u16s:ty, $i16s:ty, $u32s:ty, $i32s:ty, $u64s:ty, $i64s:ty, $f32s:ty, $f64s:ty) => {
-        /// The widest `u8x` type natively supported on the current platform.
-        pub type u8s = $u8s;
 
-        /// The widest `i8x` type natively supported on the current platform.
-        pub type i8s = $i8s;
 
-        /// The widest `u16x` type natively supported on the current platform.
-        pub type u16s = $u16s;
+macro_rules! impl_simd {
+    ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
+        impl crate::traits::Simd for $simd {
+            type Element = $element;
+            type LanesType = $lanestype;
 
-        /// The widest `i16x` type natively supported on the current platform.
-        pub type i16s = $i16s;
+            const LANES: usize = $lanes;
 
-        /// The widest `u32x` type natively supported on the current platform.
-        pub type u32s = $u32s;
+            fn splat(t: Self::Element) -> Self { Self::splat(t) }
 
-        /// The widest `i32x` type natively supported on the current platform.
-        pub type i32s = $i32s;
+            fn as_array(&self) -> &[Self::Element] {
+                let self_array = unsafe {std::mem::transmute::<_, &$lanestype>(self) };
+                self_array.as_ref()
+            }
 
-        /// The widest `u64x` type natively supported on the current platform.
-        pub type u64s = $u64s;
-
-        /// The widest `i64x` type natively supported on the current platform.
-        pub type i64s = $i64s;
-
-        /// The widest `f32x` type natively supported on the current platform.
-        pub type f32s = $f32s;
-
-        /// The widest `f64x` type natively supported on the current platform.
-        pub type f64s = $f64s;
+            fn sum(&self) -> Self::Element {
+                self.as_array().iter().sum()
+            }
+        }
     };
 }
 
-/// Vectors with fixed length of 128 bits.
-pub mod x128 {
-    impl_vecs!(
-        crate::u8x16,
-        crate::i8x16,
-        crate::u16x8,
-        crate::i16x8,
-        crate::u32x4,
-        crate::i32x4,
-        crate::u64x2,
-        crate::i64x2,
-        crate::f32x4,
-        crate::f64x2
-    );
-}
+impl_simd!(u8x16, u8, 16, [u8; 16]);
 
-/// Vectors with fixed length of 256 bits.
-pub mod x256 {
-    impl_vecs!(
-        crate::u8x32,
-        crate::i8x32,
-        crate::u16x16,
-        crate::i16x16,
-        crate::u32x8,
-        crate::i32x8,
-        crate::u64x4,
-        crate::i64x4,
-        crate::f32x8,
-        crate::f64x4
-    );
-}
+impl_simd!(i8x16, i8, 16, [i8; 16]);
+impl_simd!(i8x32, i8, 32, [i8; 32]);
 
-/// Vectors with fixed length of 512 bits.
-pub mod x512 {
-    impl_vecs!(
-        crate::u8x64,
-        crate::i8x64,
-        crate::u16x32,
-        crate::i16x32,
-        crate::u32x16,
-        crate::i32x16,
-        crate::u64x8,
-        crate::i64x8,
-        crate::f32x16,
-        crate::f64x8
-    );
-}
+impl_simd!(u16x8, u16, 8, [u16; 8]);
+impl_simd!(u16x16, u16, 16, [u16; 16]);
 
-//     // TODO: Implement heuristics for architecture / target features.
+impl_simd!(i16x8, i16, 8, [i16; 8]);
+impl_simd!(i16x16, i16, 16, [i16; 16]);
 
-/// Vectors for the current architecture.
-pub mod current {
+impl_simd!(u32x4, u32, 4, [u32; 4]);
+impl_simd!(u32x8, u32, 8, [u32; 8]);
 
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    mod current {
-        //! Vectors for the current arch.
-        impl_vecs!(
-            crate::u8x32,
-            crate::i8x32,
-            crate::u16x16,
-            crate::i16x16,
-            crate::u32x8,
-            crate::i32x8,
-            crate::u64x4,
-            crate::i64x4,
-            crate::f32x8,
-            crate::f64x4
-        );
-    }
+impl_simd!(i32x4, i32, 4, [i32; 4]);
+impl_simd!(i32x8, i32, 8, [i32; 8]);
 
-    #[cfg(any(target_arch = "aarch64"))]
-    mod current {
-        impl_vecs!(
-            crate::u8x16,
-            crate::i8x16,
-            crate::u16x8,
-            crate::i16x8,
-            crate::u32x4,
-            crate::i32x4,
-            crate::u64x2,
-            crate::i64x2,
-            crate::f32x4,
-            crate::f64x2
-        );
-    }
+impl_simd!(u64x2, u64, 2, [u64; 2]);
+impl_simd!(u64x4, u64, 4, [u64; 4]);
 
-    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
-    mod current {
-        impl_vecs!(
-            crate::u8x16,
-            crate::i8x16,
-            crate::u16x8,
-            crate::i16x8,
-            crate::u32x4,
-            crate::i32x4,
-            crate::u64x2,
-            crate::i64x2,
-            crate::f32x4,
-            crate::f64x2
-        );
-    }
+impl_simd!(i64x2, i64, 2, [i64; 2]);
+impl_simd!(i64x4, i64, 4, [i64; 4]);
 
-    pub use current::*;
-}
+impl_simd!(f32x4, f32, 4, [f32; 4]);
+impl_simd!(f32x8, f32, 8, [f32; 8]);
+
+impl_simd!(f64x2, f64, 2, [f64; 2]);
+impl_simd!(f64x4, f64, 4, [f64; 4]);

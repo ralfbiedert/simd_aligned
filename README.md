@@ -6,15 +6,14 @@ NOTE - Do not use this crate for now. It has been reactivated to make FFSVM comp
 
 ## In One Sentence
 
-You want to use [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) but realized there is no simple, safe and fast way to align your `f32x8` (and friends) in memory _and_ treat them as regular `f32` slices for easy loading and manipulation; `simd_aligned` to the rescue.
+You want to use safe SIMD datatypes from [`wide`](https://crates.io/crates/wide/) but realized there is no simple, safe and fast way to align your `f32x4` (and friends) in memory _and_ treat them as regular `f32` slices for easy loading and manipulation; `simd_aligned` to the rescue.
 
 
 ## Highlights
 
-* built on top of [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/) for easy data handling
-* supports everything from `u8x2` to `f64x8`
-* think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x16]`)
-* defines `u8s`, ..., `f36s` as "best guess" for current platform (WIP)
+* built on top of [`wide`](https://crates.io/crates/wide/) for easy data handling
+* supports everything from `u8x16` to `f64x4`
+* think in flat slices (`&[f32]`), but get performance of properly aligned SIMD vectors (`&[f32x4]`)
 * provides N-dimensional [`VectorD`] and NxM-dimensional [`MatrixD`].
 
 

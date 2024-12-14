@@ -13,9 +13,7 @@ where
     // `attributes * f32` elements, where `attributes <=  N * 8`.
     //
     // 2) The lifetime of the returned value should automatically match the self borrow.
-    //
-    // Having said this, as soon as `std::simd` (or similar) provides a safe way of handling
-    // that for us, these lines should be removed!
+
     unsafe { std::slice::from_raw_parts(ptr, length) }
 }
 
@@ -35,7 +33,6 @@ where
 /// # Example
 /// ```rust
 /// #![feature(portable_simd)]
-/// use std::simd::*;
 /// use simd_aligned::*;
 ///
 /// let packed = [f32x4::splat(0_f32); 4];
@@ -56,7 +53,6 @@ where
 /// # Example
 /// ```rust
 /// #![feature(portable_simd)]
-/// use std::simd::*;
 /// use simd_aligned::*;
 ///
 /// let mut packed = [f32x4::splat(0_f32); 4];
@@ -75,7 +71,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use std::simd::f32x4;
+    use crate::f32x4;
     use super::{packed_as_flat, packed_as_flat_mut};
 
     #[test]

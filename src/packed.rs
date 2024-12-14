@@ -63,7 +63,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use std::simd::f32x4;
+    use crate::f32x4;
     use super::PackedMxN;
 
     #[test]
