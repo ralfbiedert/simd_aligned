@@ -2,27 +2,25 @@
 //!
 #![allow(non_camel_case_types)]
 
-pub use wide::u8x16;
-pub use wide::i8x16;
-pub use wide::i8x32;
-pub use wide::u16x8;
-pub use wide::u16x16;
-pub use wide::i16x8;
-pub use wide::i16x16;
-pub use wide::u32x4;
-pub use wide::u32x8;
-pub use wide::i32x4;
-pub use wide::i32x8;
-pub use wide::u64x2;
-pub use wide::u64x4;
-pub use wide::i64x2;
-pub use wide::i64x4;
-pub use wide::f32x8;
 pub use wide::f32x4;
+pub use wide::f32x8;
 pub use wide::f64x2;
 pub use wide::f64x4;
-
-
+pub use wide::i16x16;
+pub use wide::i16x8;
+pub use wide::i32x4;
+pub use wide::i32x8;
+pub use wide::i64x2;
+pub use wide::i64x4;
+pub use wide::i8x16;
+pub use wide::i8x32;
+pub use wide::u16x16;
+pub use wide::u16x8;
+pub use wide::u32x4;
+pub use wide::u32x8;
+pub use wide::u64x2;
+pub use wide::u64x4;
+pub use wide::u8x16;
 
 macro_rules! impl_simd {
     ($simd:ty, $element:ty, $lanes:expr, $lanestype:ty) => {
@@ -32,10 +30,14 @@ macro_rules! impl_simd {
 
             const LANES: usize = $lanes;
 
-            fn splat(t: Self::Element) -> Self { Self::splat(t) }
+            fn splat(t: Self::Element) -> Self {
+                Self::splat(t)
+            }
 
+            #[allow(clippy::transmute_ptr_to_ptr)]
+            #[allow(clippy::missing_transmute_annotations)]
             fn as_array(&self) -> &[Self::Element] {
-                let self_array = unsafe {std::mem::transmute::<_, &$lanestype>(self) };
+                let self_array = unsafe { std::mem::transmute::<_, &$lanestype>(self) };
                 self_array.as_ref()
             }
 

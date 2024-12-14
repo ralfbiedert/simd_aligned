@@ -36,7 +36,7 @@ impl<T> VecD<T>
 where
     T: Simd + Default + Clone,
 {
-    /// Produce a [VecD] with the given element `t` as default and a flat size of `size`.
+    /// Produce a [`VecD`] with the given element `t` as default and a flat size of `size`.
     #[inline]
     pub fn with(t: T::Element, size: usize) -> Self {
         Self {
@@ -44,13 +44,18 @@ where
         }
     }
 
-    /// Get a flat view for this [VecD].
+    /// Get a flat view for this [`VecD`].
     #[inline]
-    pub fn flat(&self) -> &[T::Element] { simd_container_flat_slice(&self.simd_rows.data[..], self.simd_rows.row_length) }
+    #[must_use]
+    pub fn flat(&self) -> &[T::Element] {
+        simd_container_flat_slice(&self.simd_rows.data[..], self.simd_rows.row_length)
+    }
 
-    /// Get a flat, mutable view for this [VecD].
+    /// Get a flat, mutable view for this [`VecD`].
     #[inline]
-    pub fn flat_mut(&mut self) -> &mut [T::Element] { simd_container_flat_slice_mut(&mut self.simd_rows.data[..], self.simd_rows.row_length) }
+    pub fn flat_mut(&mut self) -> &mut [T::Element] {
+        simd_container_flat_slice_mut(&mut self.simd_rows.data[..], self.simd_rows.row_length)
+    }
 }
 
 impl<T> Index<usize> for VecD<T>
@@ -60,7 +65,9 @@ where
     type Output = T;
 
     #[inline]
-    fn index(&self, index: usize) -> &Self::Output { &self.simd_rows.data[index] }
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.simd_rows.data[index]
+    }
 }
 
 impl<T> IndexMut<usize> for VecD<T>
@@ -68,7 +75,9 @@ where
     T: Simd + Default + Clone,
 {
     #[inline]
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output { &mut self.simd_rows.data[index] }
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.simd_rows.data[index]
+    }
 }
 
 impl<T> Deref for VecD<T>
@@ -77,21 +86,24 @@ where
 {
     type Target = [T];
 
-    fn deref(&self) -> &[T] { &self.simd_rows.data[..] }
+    fn deref(&self) -> &[T] {
+        &self.simd_rows.data[..]
+    }
 }
 
 impl<T> DerefMut for VecD<T>
 where
     T: Simd + Default + Clone,
 {
-    fn deref_mut(&mut self) -> &mut [T] { &mut self.simd_rows.data[..] }
+    fn deref_mut(&mut self) -> &mut [T] {
+        &mut self.simd_rows.data[..]
+    }
 }
-
 
 #[cfg(test)]
 mod test {
-    use crate::f32x4;
     use super::VecD;
+    use crate::f32x4;
 
     #[test]
     fn allocation_size() {

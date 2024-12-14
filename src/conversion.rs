@@ -1,11 +1,11 @@
 use crate::traits::Simd;
 
 #[inline]
-pub(crate) fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]
+pub const fn simd_container_flat_slice<T>(data: &[T], length: usize) -> &[T::Element]
 where
     T: Simd + Default + Clone,
 {
-    let ptr = data.as_ptr() as *const T::Element;
+    let ptr = data.as_ptr().cast::<T::Element>();
 
     // This "should be safe(tm)" since:
     //
@@ -18,11 +18,11 @@ where
 }
 
 #[inline]
-pub(crate) fn simd_container_flat_slice_mut<T>(data: &mut [T], length: usize) -> &mut [T::Element]
+pub fn simd_container_flat_slice_mut<T>(data: &mut [T], length: usize) -> &mut [T::Element]
 where
     T: Simd + Default + Clone,
 {
-    let mut_ptr = data.as_mut_ptr() as *mut T::Element;
+    let mut_ptr = data.as_mut_ptr().cast::<T::Element>();
 
     // See comment above
     unsafe { std::slice::from_raw_parts_mut(mut_ptr, length) }
@@ -41,7 +41,7 @@ where
 /// assert_eq!(flat.len(), 16);
 /// ```
 #[inline]
-pub fn packed_as_flat<T>(data: &[T]) -> &[T::Element]
+pub const fn packed_as_flat<T>(data: &[T]) -> &[T::Element]
 where
     T: Simd + Default + Clone,
 {
@@ -69,8 +69,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::f32x4;
     use super::{packed_as_flat, packed_as_flat_mut};
+    use crate::f32x4;
 
     #[test]
     fn slice_flattening() {

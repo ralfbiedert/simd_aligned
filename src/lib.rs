@@ -61,12 +61,12 @@
 //! ### How does it relate to [faster](https://github.com/AdamNiederer/faster) and [`std::simd`](https://github.com/rust-lang-nursery/packed_simd/)?
 //!
 //! * `simd_aligned` builds on top of `std::simd`. At aims to provide common, SIMD-aligned
-//! data structure that support simple and safe scalar access patterns.
+//!   data structure that support simple and safe scalar access patterns.
 //!
-//! * `faster` (as of today) is really good if you already have exiting flat slices in your code
-//! and want operate them "full SIMD ahead". However, in particular when dealing with multiple
-//! slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
-//! become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
+//! * `faster` (as of today) is good if you already have exiting flat slices in your code
+//!   and want to operate them "full SIMD ahead". However, in particular when dealing with multiple
+//!   slices at the same time (e.g., kernel computations) the performance impact of unaligned arrays can
+//!   become a bit more noticeable (e.g., in the case of [ffsvm](https://github.com/ralfbiedert/ffsvm-rust/) up to 10% - 20%).
 
 #![warn(clippy::all)] // Enable ALL the warnings ...
 #![warn(clippy::nursery)]
@@ -75,14 +75,13 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::module_inception)]
 
+mod arch;
 mod conversion;
 mod mat;
 mod packed;
 mod vec;
-mod arch;
 
 pub mod traits;
-
 
 pub use crate::{
     arch::*,

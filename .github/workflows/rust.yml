@@ -20,10 +20,11 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             runs-on: ubuntu-latest
-            style-check: true
-            do-test: true
+            style: true
+            test: true
           - target: aarch64-apple-darwin
             runs-on: macos-latest
+            test: true
     runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout
@@ -40,11 +41,11 @@ jobs:
       - name: Rust - Build
         run: cargo build --verbose --target=${{ matrix.target }} --tests --all-features
       - name: Rust - Style
-        if: matrix.style-check == true
+        if: matrix.style == true
         run: cargo fmt --check
       - name: Rust - Clippy
-        if: matrix.style-check == true
+        if: matrix.style == true
         run: cargo clippy -- -D warnings
       - name: Rust - Test
-        if: matrix.do-test == true
+        if: matrix.test == true
         run: cargo test --verbose --target=${{ matrix.target }} --all-features -- --test-threads=1 --nocapture

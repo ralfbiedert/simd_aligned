@@ -6,7 +6,7 @@ use super::{
 };
 
 #[derive(Clone, Debug)]
-pub(crate) struct PackedMxN<T>
+pub struct PackedMxN<T>
 where
     T: Simd + Default + Clone,
 {
@@ -37,14 +37,16 @@ where
 
     /// Computes an offset for a vector and attribute.
     #[inline]
-    pub(crate) fn row_start_offset(&self, row: usize) -> usize { row * self.vectors_per_row }
+    pub(crate) const fn row_start_offset(&self, row: usize) -> usize {
+        row * self.vectors_per_row
+    }
 
     /// Returns the range of SIMD vectors for the given row.
     #[inline]
-    pub(crate) fn range_for_row(&self, row: usize) -> Range<usize> {
+    pub(crate) const fn range_for_row(&self, row: usize) -> Range<usize> {
         let start = self.row_start_offset(row);
         let end = start + self.vectors_per_row;
-        start .. end
+        start..end
     }
 
     #[inline]
@@ -63,8 +65,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::f32x4;
     use super::PackedMxN;
+    use crate::f32x4;
 
     #[test]
     fn allocation_size() {
@@ -87,7 +89,7 @@ mod test {
     fn range() {
         let r = PackedMxN::<f32x4>::with(f32x4::splat(0.0), 16, 16);
 
-        assert_eq!(r.range_for_row(2), 8 .. 12);
+        assert_eq!(r.range_for_row(2), 8..12);
     }
 
     #[test]

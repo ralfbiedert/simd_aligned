@@ -25,12 +25,16 @@ pub struct Columns;
 
 impl AccessStrategy for Rows {
     #[inline]
-    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) { (x, y) }
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
+        (x, y)
+    }
 }
 
 impl AccessStrategy for Columns {
     #[inline]
-    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) { (y, x) }
+    fn flat_to_packed(x: usize, y: usize) -> (usize, usize) {
+        (y, x)
+    }
 }
 
 /// A dynamic (heap allocated) matrix with one axis aligned for fast and safe SIMD access that
@@ -78,6 +82,7 @@ where
 {
     /// Creates a new [`MatD`] with the given dimension.
     #[inline]
+    #[must_use]
     pub fn with_dimension(width: usize, height: usize) -> Self {
         let (x, y) = O::flat_to_packed(width, height);
 
@@ -88,11 +93,15 @@ where
     }
 
     /// Returns the size as (`rows`, `columns`).
-    pub fn dimension(&self) -> (usize, usize) { O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length) }
+    #[must_use]
+    pub fn dimension(&self) -> (usize, usize) {
+        O::flat_to_packed(self.simd_rows.rows, self.simd_rows.row_length)
+    }
 
     /// Provides a flat, immutable view of the contained data.
     #[inline]
-    pub fn flat(&self) -> MatrixFlat<'_, T, O> {
+    #[must_use]
+    pub const fn flat(&self) -> MatrixFlat<'_, T, O> {
         MatrixFlat {
             matrix: self,
             phantom: PhantomData,
@@ -114,13 +123,17 @@ where
     T: Simd + Default + Clone,
 {
     #[inline]
+    #[must_use]
     pub fn row(&self, i: usize) -> &[T] {
         let range = self.simd_rows.range_for_row(i);
         &self.simd_rows.data[range]
     }
 
     #[inline]
-    pub fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> { Matrix2DIter { matrix: self, index: 0 } }
+    #[must_use]
+    pub const fn row_iter(&self) -> Matrix2DIter<'_, T, Rows> {
+        Matrix2DIter { matrix: self, index: 0 }
+    }
 
     #[inline]
     pub fn row_mut(&mut self, i: usize) -> &mut [T] {
@@ -129,6 +142,7 @@ where
     }
 
     #[inline]
+    #[must_use]
     pub fn row_as_flat(&self, i: usize) -> &[T::Element] {
         let row = self.row(i);
         simd_container_flat_slice(row, self.simd_rows.row_length)
@@ -147,27 +161,34 @@ where
     T: Simd + Default + Clone,
 {
     #[inline]
+    #[must_use]
     pub fn column(&self, i: usize) -> &[T] {
         let range = self.simd_rows.range_for_row(i);
         &self.simd_rows.data[range]
     }
 
     #[inline]
-    pub fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> { Matrix2DIter { matrix: self, index: 0 } }
+    #[must_use]
+    pub const fn column_iter(&self) -> Matrix2DIter<'_, T, Columns> {
+        Matrix2DIter { matrix: self, index: 0 }
+    }
 
     #[inline]
+    #[must_use]
     pub fn column_mut(&mut self, i: usize) -> &mut [T] {
         let range = self.simd_rows.range_for_row(i);
         &mut self.simd_rows.data[range]
     }
 
     #[inline]
+    #[must_use]
     pub fn column_as_flat(&self, i: usize) -> &[T::Element] {
         let column = self.column(i);
         simd_container_flat_slice(column, self.simd_rows.row_length)
     }
 
     #[inline]
+    #[must_use]
     pub fn column_as_flat_mut(&mut self, i: usize) -> &mut [T::Element] {
         let length = self.simd_rows.row_length;
         let column = self.column_mut(i);
@@ -176,26 +197,26 @@ where
 }
 
 /// Produced by [`MatD::flat`], this allow for flat matrix access.
-pub struct MatrixFlat<'a, T: 'a, A: 'a>
+pub struct MatrixFlat<'a, T, A>
 where
-    T: Simd + Default + Clone,
-    A: AccessStrategy,
+    T: Simd + Default + Clone + 'a,
+    A: AccessStrategy + 'a,
 {
     matrix: &'a MatD<T, A>,
     phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
 /// Provided by [`MatD::flat_mut`], this allow for flat, mutable matrix access.
-pub struct MatrixFlatMut<'a, T: 'a, A: 'a>
+pub struct MatrixFlatMut<'a, T, A>
 where
-    T: Simd + Default + Clone,
-    A: AccessStrategy,
+    T: Simd + Default + Clone + 'a,
+    A: AccessStrategy + 'a,
 {
     matrix: &'a mut MatD<T, A>,
     phantom: PhantomData<A>, // Do we actually need this / is there a better way?
 }
 
-impl<'a, T, A> Index<(usize, usize)> for MatrixFlat<'a, T, A>
+impl<T, A> Index<(usize, usize)> for MatrixFlat<'_, T, A>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
@@ -211,7 +232,7 @@ where
     }
 }
 
-impl<'a, T, A> Index<(usize, usize)> for MatrixFlatMut<'a, T, A>
+impl<T, A> Index<(usize, usize)> for MatrixFlatMut<'_, T, A>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
@@ -227,7 +248,7 @@ where
     }
 }
 
-impl<'a, T, A> IndexMut<(usize, usize)> for MatrixFlatMut<'a, T, A>
+impl<T, A> IndexMut<(usize, usize)> for MatrixFlatMut<'_, T, A>
 where
     T: Simd + Default + Clone,
     A: AccessStrategy,
@@ -243,10 +264,10 @@ where
 
 /// Basic iterator struct to go over matrix
 #[derive(Clone, Debug)]
-pub struct Matrix2DIter<'a, T: 'a, O: 'a>
+pub struct Matrix2DIter<'a, T, O>
 where
-    T: Simd + Default + Clone,
-    O: AccessStrategy,
+    T: Simd + Default + Clone + 'a,
+    O: AccessStrategy + 'a,
 {
     /// Reference to the matrix we iterate over.
     pub(crate) matrix: &'a MatD<T, O>,
